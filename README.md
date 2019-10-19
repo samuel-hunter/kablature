@@ -1,7 +1,6 @@
 # kablature
-### _Sam Hunter_
 
-This is a project to do ... something.
+Tool to assist creating Kalimba tablatures
 
 ## License
 

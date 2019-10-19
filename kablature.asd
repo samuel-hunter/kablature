@@ -7,5 +7,4 @@
   :version "0.0.1"
   :serial t
   :depends-on (#:cl-svg)
-  :components ((:file "package")
-               (:file "kablature")))
+  :components ((:file "kablature")))
