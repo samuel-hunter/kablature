@@ -9,4 +9,5 @@
   :depends-on (#:cl-svg)
   :components ((:file "model")
                (:file "reader")
+               (:file "eval")
                (:file "kablature")))
