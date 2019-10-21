@@ -17,7 +17,7 @@
 
 (defun make-beamed (beamed-sexp)
   (destructuring-bind (beamed &rest chord-sexps) beamed-sexp
-    (assert (eq beamed 'beamed))
+    (assert (string-equal (string beamed) "BEAMED"))
     (loop :for chord-sexp :in chord-sexps
           :collect (make-chord chord-sexp) :into chords
           :finally (return (make-instance 'beamed :chords chords)))))
@@ -32,7 +32,7 @@
 (defun make-tablature (tab-sexp)
   (destructuring-bind (deftablature title proplist
                        &body construct-sexps) tab-sexp
-    (assert (eq deftablature 'deftablature))
+    (assert (string-equal (string deftablature) "DEFTABLATURE"))
     (let ((timesig (getf proplist :timesig (cons 4 4)))
           (keys (getf proplist :keys 17)))
       (loop :for sexp :in construct-sexps

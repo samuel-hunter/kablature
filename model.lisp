@@ -24,11 +24,11 @@
    (dottedp :type boolean :accessor dottedp :initarg :dottedp)
    (keys :accessor keys :initarg :keys)))
 
-(defmethod duration ((note chord))
+(defmethod duration ((chord chord))
   (with-slots (note dottedp) chord
     (if dottedp
-        (* note 3/2)
-        note)))
+        (/ 3/2 note)
+        (/ note))))
 
 (defun restp (chord)
   "Returns whether CHORD is actually a rest."

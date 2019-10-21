@@ -10,7 +10,8 @@
 
 (in-package #:kablature)
 
+(defun print-kab (kab))
 
-
-(defun print-kab (kab)
-  (print kab))
+(defun rep-file-path (pathname)
+  (with-open-file (stream pathname :direction :input)
+    (print-kab (eval-kab (read-kab stream)))))
