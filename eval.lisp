@@ -4,38 +4,38 @@
 
 (in-package #:kablature.eval)
 
-(defparameter octave-notes "ABCDEFG" "Letters used in each octave")
-(defparameter octave-root 2 "Letter at Key 1")
+(defun make-chord (note-sexp)
+  (destructuring-bind (note dottedp &rest keys) note-sexp
+    (check-type note integer)
+    (check-type dottedp boolean)
+    (loop :for key :in keys :do (check-type key integer))
+    (make-instance 'chord :note note :dottedp dottedp :keys keys)))
 
-(defparameter tabnote-offset-y 5)
-(defparameter tabnote-width 15)
-(defparameter tabnote-color "white")
-(defparameter tabnote-marked "salmon")
+(defun make-beamed (beamed-sexp)
+  (destructuring-bind (beamed &rest chord-sexps) beamed-sexp
+    (assert (string-equal (string beamed) "BEAMED"))
+    (loop :for chord-sexp :in chord-sexps
+          :collect (make-chord chord-sexp) :into chords
+          :finally (return (make-instance 'beamed :chords chords)))))
 
-(defparameter measure-thickness 3)
-(defparameter font-size 10)
+(defun make-construct (sexp)
+  (let ((first-elem (first sexp)))
+    (cond
+      ((eq 'beamed first-elem) (make-beamed sexp))
+      ((typep first-elem 'integer) (make-chord sexp))
+      (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
 
-(defparameter note-radius 4)
-(defparameter beat-height (* 2 tabnote-width))
-
-(defparameter thin-style "stroke-width:1;stroke:black")
-(defparameter measure-style (format nil "stroke-width~A;stroke:black" measure-thickness))
-(defparameter text-style (format nil "font-size:~A;fill:black" font-size))
-
-;; FIXME: 4/4 timesignature is hardcoded in this procedure.
-(defun count-measures (tab)
-  "Count the measures within a tablature"
-  (loop :with duration := 0
-        :and measures := 0
-        :for construct :in (constructs kab)
-        :do (progn
-              (incf duration (duration construct))
-              (assert (<= duration 1))
-              (when (= duration 1)
-                (incf measures)
-                (setf duration 0)))
-        :finally (return measures)))
-
-(defun eval-kab (kab)
-  (format t "Measures: ~A~&" (count-measures kab))
-  kab)
+(defun eval-kab (tab-sexp)
+  (destructuring-bind (deftablature title proplist
+                       &body construct-sexps) tab-sexp
+    (assert (string-equal (string deftablature) "DEFTABLATURE"))
+    (let ((timesig (getf proplist :timesig (cons 4 4)))
+          (keys (getf proplist :keys 17)))
+      (loop :for sexp :in construct-sexps
+            :collect (make-construct sexp) :into constructs
+            :finally (return
+                       (make-instance 'tablature
+                                      :title title
+                                      :timesig timesig
+                                      :keys keys
+                                      :constructs constructs))))))

@@ -1,16 +1,16 @@
 (defpackage #:kablature
   (:use #:cl)
-  (:import-from :kablature.reader
+  (:import-from :kablature.read
                 :read-kab)
   (:import-from :kablature.eval
                 :eval-kab)
+  (:import-from :kablature.print
+                :print-kab)
   (:export :read-kab
            :eval-kab
            :print-kab))
 
 (in-package #:kablature)
-
-(defun print-kab (kab))
 
 (defun rep-file-path (pathname)
   (with-open-file (stream pathname :direction :input)
