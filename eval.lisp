@@ -4,6 +4,24 @@
 
 (in-package #:kablature.eval)
 
+(defparameter octave-notes "ABCDEFG" "Letters used in each octave")
+(defparameter octave-root 2 "Letter at Key 1")
+
+(defparameter tabnote-offset-y 5)
+(defparameter tabnote-width 15)
+(defparameter tabnote-color "white")
+(defparameter tabnote-marked "salmon")
+
+(defparameter measure-thickness 3)
+(defparameter font-size 10)
+
+(defparameter note-radius 4)
+(defparameter beat-height (* 2 tabnote-width))
+
+(defparameter thin-style "stroke-width:1;stroke:black")
+(defparameter measure-style (format nil "stroke-width~A;stroke:black" measure-thickness))
+(defparameter text-style (format nil "font-size:~A;fill:black" font-size))
+
 ;; FIXME: 4/4 timesignature is hardcoded in this procedure.
 (defun count-measures (tab)
   "Count the measures within a tablature"
