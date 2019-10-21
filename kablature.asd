@@ -8,4 +8,5 @@
   :serial t
   :depends-on (#:cl-svg)
   :components ((:file "model")
+               (:file "reader")
                (:file "kablature")))
