@@ -12,6 +12,15 @@
 
 (in-package #:kablature)
 
-(defun rep-file-path (pathname)
+(defun rep-file-path (pathname &key output)
   (with-open-file (stream pathname :direction :input)
-    (print-kab (eval-kab (read-kab stream)))))
+    (let ((kab (eval-kab (read-kab stream))))
+      (if output
+          (print-kab kab output)
+          (print-kab kab)))))
+
+(defun preview (&optional (pathname #P"examples/hot-cross-buns.lisp")
+                       (out-path "/tmp/kablature.svg"))
+  (with-open-file (outstream out-path :direction :output :if-exists :supersede)
+    (rep-file-path pathname :output outstream)
+    (sb-ext:run-program "/usr/bin/xdg-open" (list out-path))))
