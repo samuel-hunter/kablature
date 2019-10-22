@@ -27,16 +27,17 @@
 
 (defun key-position (key kab)
   "Return the position of the key on the tablature, starting left."
-  (let ((root-index (ceiling (keys kab) 2)))
+  (let ((root-index (floor (1- (keys kab)) 2)))
     (if (oddp key)
         (+ root-index (floor key 2))
         (- root-index (/ key 2)))))
 
-(defun tab-header-height (kab)
-  (* tabnote-offset-y (ceiling (keys kab) 2)))
+(defun max-tab-header-offset (kab)
+  "Return the height the first key reaches out in the header."
+  (* tabnote-offset-y (floor (keys kab) 2)))
 
-(defun full-tab-header-height (kab)
-  (+ font-size (tab-header-height kab)))
+(defun tab-header-height (kab)
+  (+ font-size (max-tab-header-offset kab)))
 
 (defun markedp (key)
   (zerop (mod (floor key 2) 3)))
@@ -44,30 +45,65 @@
 (defun key-note (key)
   (char octave-notes (mod (+ key octave-root -1) (length octave-notes))))
 
-(defun draw-tab (kab scene)
-  (loop :for key :from 1 :upto (keys kab)
-        :for x := (+ tab-margin-x (* tabnote-width (key-position key kab)))
-        :for offset-height := (- (tab-header-height kab)
-                                 (* tabnote-offset-y (floor key 2)))
-        :for markedp := (markedp key)
+(defun measure-height (kab)
+  "Return the height of a measure in a tablature bar."
+  (* (1+ (beats-per-measure kab)) ; 1+ for the measure bar.
+     beat-height))
 
-        :with note-text-style := (concatenate 'string text-style ";text-anchor:middle")
-        :do (progn
-              (cl-svg:draw scene (:rect :x (- x (/ tabnote-width 2)) :y tab-margin-y
-                                        :width tabnote-width :height offset-height)
-                           :fill (if markedp
-                                     tabnote-marked
-                                     tabnote-color) :stroke "black")
-              (cl-svg:text scene (:x x :y (+ tab-margin-y offset-height font-size) :style note-text-style)
-                (string (key-note key))))))
+(defun tab-body-height (kab measures)
+  (* (measure-height kab) measures))
+
+(defun tab-bar-height (kab measures)
+  "Return the height the tab bar  with the MEASURES will reach to."
+  (+ (tab-header-height kab) (tab-body-height kab measures)))
+
+(defun draw-tab-bar (kab scene measures)
+
+  (let* ((left-x tab-margin-x)
+         (right-x (+ left-x (* tabnote-width (keys kab))))
+         (top-y tab-margin-y)
+         (body-height (tab-body-height kab measures))
+         (body-bottom-y (+ top-y body-height)))
+
+
+
+    ;; Draw bars where notes will reside and text labels.
+    (loop :for key :from 1 :upto (keys kab)
+          :for x := (+ left-x (* tabnote-width (key-position key kab)))
+          :for offset-height := (* tabnote-offset-y (floor (- (keys kab) key) 2))
+          :for markedp := (markedp key)
+
+          :with note-text-style := (concatenate 'string text-style ";text-anchor:middle")
+
+          :do (progn
+                ;; Draw the key space
+                (cl-svg:draw scene (:rect :x x :y tab-margin-y
+                                          :width tabnote-width :height (+ body-height offset-height))
+                             :fill (if markedp
+                                       tabnote-marked
+                                       tabnote-color) :stroke "black")
+
+                ;; Draw the pitch label
+                (cl-svg:text scene (:x (+ x (/ tabnote-width 2))
+                                    :y (+ body-bottom-y offset-height font-size)
+                                    :style note-text-style)
+                  (string (key-note key)))))
+
+    ;; Draw measures
+    (loop :for measure :from 1 :upto (measures kab)
+          :for y := body-bottom-y :then (- y (measure-height kab))
+          :do (progn
+                (cl-svg:draw scene (:line :x1 left-x :x2 right-x
+                                          :y1 y :y2 y) :style measure-style)))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
-  (let* ((tab-width (* tabnote-width (keys kab)))
+  (let* ((measures (measures kab))
+         (tab-width (* tabnote-width (keys kab)))
          (width (+ tab-width (* 2 tab-margin-x)))
-         (height (+ (full-tab-header-height kab) (* 2 tab-margin-y)))
+         (height (+ (tab-bar-height kab measures) (* 2 tab-margin-y)))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width :height height)))
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
-    (draw-tab kab scene)
+    (draw-tab-bar kab scene measures)
     (cl-svg:stream-out stream scene)))
