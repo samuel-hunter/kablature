@@ -28,19 +28,19 @@
 
 (defparameter +note-text-style+ (concatenate 'string +text-style+ ";text-anchor:middle"))
 
-(defun key-position (key kab)
+(defun key-position (key num-keys)
   "Return the position of the key on the tablature, starting left."
-  (let ((root-index (floor (1- (keys kab)) 2)))
+  (let ((root-index (floor (1- num-keys) 2)))
     (if (oddp key)
         (+ root-index (floor key 2))
         (- root-index (/ key 2)))))
 
-(defun max-tab-header-offset (kab)
+(defun max-tab-header-offset (num-keys)
   "Return the height the first key reaches out in the header."
-  (* +tabnote-offset-y+ (floor (keys kab) 2)))
+  (* +tabnote-offset-y+ (floor num-keys 2)))
 
-(defun tab-header-height (kab)
-  (+ +font-size+ (max-tab-header-offset kab)))
+(defun tab-header-height (num-keys)
+  (+ +font-size+ (max-tab-header-offset num-keys)))
 
 (defun markedp (key)
   (zerop (mod (floor key 2) 3)))
@@ -48,32 +48,33 @@
 (defun key-note (key)
   (char +octave-notes+ (mod (+ key +octave-root+ -1) (length +octave-notes+))))
 
-(defun measure-height (kab)
+(defun measure-height (timesig)
   "Return the height of a measure in a tablature bar."
-  (* (1+ (beats-per-measure kab)) ; 1+ for the measure bar.
+  (* (1+ (beats-per-measure timesig)) ; 1+ for the measure bar.
      +beat-height+))
 
-(defun tab-body-height (kab num-measures)
-  (* (measure-height kab) num-measures))
+(defun tab-body-height (timesig num-measures)
+  (* (measure-height timesig) num-measures))
 
 (defun tab-bar-height (kab num-measures)
   "Return the height the tab bar  with the MEASURES will reach to."
-  (+ (tab-header-height kab) (tab-body-height kab num-measures)))
+  (+ (tab-header-height (keys kab)) (tab-body-height (timesig kab) num-measures)))
 
 (defun draw-tab-bar (kab scene num-measures)
 
   (let* ((left-x +tab-margin-x+)
          (right-x (+ left-x (* +tabnote-width+ (keys kab))))
          (top-y +tab-margin-y+)
-         (body-height (tab-body-height kab num-measures))
-         (body-bottom-y (+ top-y body-height)))
+         (body-height (tab-body-height (timesig kab) num-measures))
+         (body-bottom-y (+ top-y body-height))
+         (num-keys (keys kab)))
 
 
 
     ;; Draw bars where notes will reside and text labels.
     (loop :for key :from 1 :upto (keys kab)
-          :for x := (+ left-x (* +tabnote-width+ (key-position key kab)))
-          :for offset-height := (* +tabnote-offset-y+ (floor (- (keys kab) key) 2))
+          :for x := (+ left-x (* +tabnote-width+ (key-position key num-keys)))
+          :for offset-height := (* +tabnote-offset-y+ (floor (- num-keys key) 2))
           :for markedp := (markedp key)
 
           :do (progn
@@ -92,7 +93,7 @@
 
     ;; Draw measures
     (loop :for measure :from 1 :upto num-measures
-          :for y := body-bottom-y :then (- y (measure-height kab))
+          :for y := body-bottom-y :then (- y (measure-height (timesig kab)))
           :do (progn
                 ;; measure line
                 (cl-svg:draw scene (:line :x1 left-x :x2 right-x

@@ -25,33 +25,31 @@
       ((typep first-elem 'integer) (make-chord sexp))
       (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
 
-(defun group-constructs (constructs beats-per-measure beat-root)
+(defun group-constructs (constructs timesig)
   "Group constructs together into measures."
   (loop :with measures := ()
         :with measure-constructs := ()
         :with beats := 0
 
         :for construct :in constructs
-        :do (incf beats (beat-length construct beat-root))
+        :do (incf beats (beat-length construct (beat-root timesig)))
         :do (push construct measure-constructs)
         :do (cond
-              ((= beats beats-per-measure)
+              ((= beats (beats-per-measure timesig))
                (push (nreverse measure-constructs) measures)
                (setf measure-constructs ())
                (setf beats 0))
-              ((> beats beats-per-measure)
-               (error "Found ~S beats in measure ~S by construct ~S; expected ~S beats."
-                      beats (length measures) construct beats-per-measure)))
+              ((> beats (beats-per-measure timesig))
+               (error "Found ~S beats in measure ~S by construct ~S."
+                      beats (length measures) construct)))
         :finally (return (nreverse measures))))
 
 (defun eval-kab (tab-sexp)
   (destructuring-bind (deftablature title proplist
                        &body construct-sexps) tab-sexp
     (assert (string-equal (string deftablature) "DEFTABLATURE"))
-    (let* ((timesig (getf proplist :timesig (cons 4 4)))
-           (keys (getf proplist :keys 17))
-           (beats-per-measure (car timesig))
-           (beat-root (cdr timesig)))
+    (let ((timesig (getf proplist :timesig (cons 4 4)))
+          (keys (getf proplist :keys 17)))
       (loop :for sexp :in construct-sexps
             :collect (make-construct sexp) :into constructs
             :finally (return
@@ -62,4 +60,4 @@
                         :keys keys
                         :measures
                         (group-constructs constructs
-                                          beats-per-measure beat-root)))))))
+                                          timesig)))))))

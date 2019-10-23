@@ -54,9 +54,9 @@
    (timesig :type (cons integer integer) :reader timesig :initarg :timesig)
    (measures :reader measures :initarg :measures)))
 
-(defun beats-per-measure (tab)
-  (car (timesig tab)))
+(defun beats-per-measure (timesig)
+  (car timesig))
 
-(defun beat-root (tab)
+(defun beat-root (timesig)
   "Return the note which defines a beat in the tablature.."
-  (cdr (timesig tab)))
+  (cdr timesig))
