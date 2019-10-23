@@ -60,18 +60,17 @@
   "Return the height the tab bar  with the MEASURES will reach to."
   (+ (tab-header-height (keys kab)) (tab-body-height (timesig kab) num-measures)))
 
-(defun draw-tab-bar (kab scene num-measures)
+(defun tab-width (num-keys)
+  (* +tabnote-width+ num-keys))
 
-  (let* ((left-x +tab-margin-x+)
-         (right-x (+ left-x (* +tabnote-width+ (keys kab))))
+(defun draw-tab-bar (kab scene num-measures)
+  "Draw bars where notes will reside and text labels to signal the keys' notes."
+  (let* ((num-keys (keys kab))
+         (left-x +tab-margin-x+)
          (top-y +tab-margin-y+)
          (body-height (tab-body-height (timesig kab) num-measures))
-         (body-bottom-y (+ top-y body-height))
-         (num-keys (keys kab)))
+         (body-bottom-y (+ top-y body-height)))
 
-
-
-    ;; Draw bars where notes will reside and text labels.
     (loop :for key :from 1 :upto (keys kab)
           :for x := (+ left-x (* +tabnote-width+ (key-position key num-keys)))
           :for offset-height := (* +tabnote-offset-y+ (floor (- num-keys key) 2))
@@ -89,20 +88,24 @@
                 (cl-svg:text scene (:x (+ x (/ +tabnote-width+ 2))
                                     :y (+ body-bottom-y offset-height +font-size+)
                                     :style +note-text-style+)
-                  (string (key-note key)))))
+                  (string (key-note key)))))))
 
-    ;; Draw measures
-    (loop :for measure :from 1 :upto num-measures
-          :for y := body-bottom-y :then (- y (measure-height (timesig kab)))
-          :do (progn
-                ;; measure line
-                (cl-svg:draw scene (:line :x1 left-x :x2 right-x
-                                          :y1 y :y2 y) :style +measure-style+)
+(defun draw-measure (scene measure num-measure tab-measures timesig num-keys)
+  "Draw the measure bar."
+  (let* ((measure-bottom (- (+ +tab-margin-y+ (tab-body-height timesig tab-measures))
+                            (* (1- num-measure) (measure-height timesig))))
+         (tab-left +tab-margin-x+)
+         (tab-right (+ tab-left (tab-width num-keys))))
 
-                ;; measure label
-                (cl-svg:text scene (:x (+ +measure-text-margin+ right-x) :y y
-                                    :style +text-style+ :dominant-baseline "middle")
-                  (write-to-string measure))))))
+
+    ;; measure line
+    (cl-svg:draw scene (:line :x1 tab-left :x2 tab-right
+                              :y1 measure-bottom :y2 measure-bottom)
+                 :style +measure-style+)
+    ;; measure label
+    (cl-svg:text scene (:x (+ +measure-text-margin+ tab-right) :y measure-bottom
+                        :style +text-style+ :dominant-baseline "middle")
+      (write-to-string num-measure))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
   (let* ((num-measures (length (measures kab)))
@@ -114,4 +117,7 @@
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
     (draw-tab-bar kab scene num-measures)
+    (loop :for measure :in (measures kab)
+          :for num-measure := 1 :then (1+ num-measure)
+          :do (draw-measure scene measure num-measure num-measures (timesig kab) (keys kab)))
     (cl-svg:stream-out stream scene)))
