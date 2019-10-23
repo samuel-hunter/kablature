@@ -53,19 +53,19 @@
   (* (1+ (beats-per-measure kab)) ; 1+ for the measure bar.
      +beat-height+))
 
-(defun tab-body-height (kab measures)
-  (* (measure-height kab) measures))
+(defun tab-body-height (kab num-measures)
+  (* (measure-height kab) num-measures))
 
-(defun tab-bar-height (kab measures)
+(defun tab-bar-height (kab num-measures)
   "Return the height the tab bar  with the MEASURES will reach to."
-  (+ (tab-header-height kab) (tab-body-height kab measures)))
+  (+ (tab-header-height kab) (tab-body-height kab num-measures)))
 
-(defun draw-tab-bar (kab scene measures)
+(defun draw-tab-bar (kab scene num-measures)
 
   (let* ((left-x +tab-margin-x+)
          (right-x (+ left-x (* +tabnote-width+ (keys kab))))
          (top-y +tab-margin-y+)
-         (body-height (tab-body-height kab measures))
+         (body-height (tab-body-height kab num-measures))
          (body-bottom-y (+ top-y body-height)))
 
 
@@ -91,7 +91,7 @@
                   (string (key-note key)))))
 
     ;; Draw measures
-    (loop :for measure :from 1 :upto (measures kab)
+    (loop :for measure :from 1 :upto num-measures
           :for y := body-bottom-y :then (- y (measure-height kab))
           :do (progn
                 ;; measure line
@@ -101,17 +101,16 @@
                 ;; measure label
                 (cl-svg:text scene (:x (+ +measure-text-margin+ right-x) :y y
                                     :style +text-style+ :dominant-baseline "middle")
-                  (write-to-string measure))
-                ))))
+                  (write-to-string measure))))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
-  (let* ((measures (measures kab))
+  (let* ((num-measures (length (measures kab)))
          (tab-width (* +tabnote-width+ (keys kab)))
          (width (+ tab-width (* 2 +tab-margin-x+)))
-         (height (+ (tab-bar-height kab measures) (* 2 +tab-margin-y+)))
+         (height (+ (tab-bar-height kab num-measures) (* 2 +tab-margin-y+)))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width :height height)))
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
-    (draw-tab-bar kab scene measures)
+    (draw-tab-bar kab scene num-measures)
     (cl-svg:stream-out stream scene)))
