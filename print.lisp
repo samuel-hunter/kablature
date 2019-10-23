@@ -13,17 +13,20 @@
 (defparameter tabnote-marked "salmon")
 
 (defparameter measure-thickness 3)
-(defparameter font-size 10)
+(defparameter font-size 15)
 
 (defparameter note-radius 4)
 (defparameter beat-height (* 2 tabnote-width))
 
 (defparameter tab-margin-x 50)
 (defparameter tab-margin-y 10)
+(defparameter measure-text-margin 5)
 
 (defparameter thin-style "stroke-width:1;stroke:black")
 (defparameter measure-style (format nil "stroke-width~A;stroke:black" measure-thickness))
 (defparameter text-style (format nil "font-size:~A;fill:black" font-size))
+
+(defparameter note-text-style (concatenate 'string text-style ";text-anchor:middle"))
 
 (defun key-position (key kab)
   "Return the position of the key on the tablature, starting left."
@@ -73,8 +76,6 @@
           :for offset-height := (* tabnote-offset-y (floor (- (keys kab) key) 2))
           :for markedp := (markedp key)
 
-          :with note-text-style := (concatenate 'string text-style ";text-anchor:middle")
-
           :do (progn
                 ;; Draw the key space
                 (cl-svg:draw scene (:rect :x x :y tab-margin-y
@@ -93,8 +94,15 @@
     (loop :for measure :from 1 :upto (measures kab)
           :for y := body-bottom-y :then (- y (measure-height kab))
           :do (progn
+                ;; measure line
                 (cl-svg:draw scene (:line :x1 left-x :x2 right-x
-                                          :y1 y :y2 y) :style measure-style)))))
+                                          :y1 y :y2 y) :style measure-style)
+
+                ;; measure label
+                (cl-svg:text scene (:x (+ measure-text-margin right-x) :y y
+                                    :style text-style :dominant-baseline "middle")
+                  (write-to-string measure))
+                ))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
   (let* ((measures (measures kab))
