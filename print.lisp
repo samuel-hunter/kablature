@@ -23,8 +23,8 @@
 (defparameter +measure-text-margin+ 5)
 
 (defparameter +thin-style+ "stroke-width:1;stroke:black")
-(defparameter +measure-style+ (format nil "stroke-width~A;stroke:black" +measure-thickness+))
 (defparameter +text-style+ (format nil "+font-size+:~A;fill:black" +font-size+))
+(defparameter +measure-color+ "black")
 
 (defparameter +note-text-style+ (concatenate 'string +text-style+ ";text-anchor:middle"))
 
@@ -133,7 +133,8 @@
     ;; measure line
     (cl-svg:draw scene (:line :x1 tab-left :x2 tab-right
                               :y1 measure-bottom :y2 measure-bottom)
-                 :style +measure-style+)
+                 :stroke-width +measure-thickness+
+                 :stroke +measure-color+)
     ;; measure label
     (cl-svg:text scene (:x (+ +measure-text-margin+ tab-right) :y measure-bottom
                         :style +text-style+ :dominant-baseline "middle")
