@@ -117,18 +117,16 @@
                                  :style +note-text-style+)
                (string (key-pitch key)))))
 
-(defun measure-bottom (num-measure timesig tab-measures)
+(defun measure-bottom (measure-num timesig tab-measures)
   "Return the y position of the bottom of the given measure."
   (- (tab-body-bottom timesig tab-measures)
-     (* (1- num-measure) (measure-height timesig))))
+     (* measure-num (measure-height timesig))))
 
-(defun draw-measure (scene measure num-measure tab-measures timesig num-keys)
+(defun draw-measure (scene kab measure-num tab-measures)
   "Draw the measure bar."
-  (declare (ignore measure))
-
-  (let ((measure-bottom (measure-bottom num-measure timesig tab-measures))
+  (let ((measure-bottom (measure-bottom measure-num (timesig kab) tab-measures))
         (tab-left (tab-left))
-        (tab-right (tab-right num-keys)))
+        (tab-right (tab-right (keys kab))))
 
     ;; measure line
     (cl-svg:draw scene (:line :x1 tab-left :x2 tab-right
@@ -138,7 +136,7 @@
     ;; measure label
     (cl-svg:text scene (:x (+ +measure-text-margin+ tab-right) :y measure-bottom
                         :style +text-style+ :dominant-baseline "middle")
-      (write-to-string num-measure))))
+      (write-to-string (1+ measure-num)))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
   (let* ((num-measures (length (measures kab)))
@@ -150,7 +148,6 @@
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
     (draw-tab-bar kab scene num-measures)
-    (loop :for measure :in (measures kab)
-          :for num-measure := 1 :then (1+ num-measure)
-          :do (draw-measure scene measure num-measure num-measures (timesig kab) (keys kab)))
+    (loop :for measure-num :upto (1- num-measures)
+          :do (draw-measure scene kab measure-num num-measures))
     (cl-svg:stream-out stream scene)))
