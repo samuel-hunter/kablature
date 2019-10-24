@@ -45,7 +45,8 @@
 (defun markedp (key)
   (zerop (mod (floor key 2) 3)))
 
-(defun key-note (key)
+(defun key-pitch (key)
+  "Return the pitch associated with the key."
   (char +octave-notes+ (mod (+ key +octave-root+ -1) (length +octave-notes+))))
 
 (defun measure-height (timesig)
@@ -53,50 +54,81 @@
   (* (1+ (beats-per-measure timesig)) ; 1+ for the measure bar.
      +beat-height+))
 
+(defun tab-left ()
+  "Return the left x position of the tab."
+  +tab-margin-x+)
+
+(defun tab-width (num-keys)
+  "Return the width of the tab."
+  (* +tabnote-width+ num-keys))
+
+(defun tab-right (num-keys)
+  "Return the right x position of the tab."
+  (+ (tab-left) (tab-width num-keys)))
+
+(defun tab-top ()
+  "Return the top y position of the tab."
+  +tab-margin-x+)
+
 (defun tab-body-height (timesig num-measures)
+  "Return the height of the tab body."
   (* (measure-height timesig) num-measures))
+
+(defun tab-body-bottom (timesig num-measures)
+  "Return the bottom y position of the tab body."
+  (+ (tab-top) (tab-body-height timesig num-measures)))
 
 (defun tab-bar-height (kab num-measures)
   "Return the height the tab bar  with the MEASURES will reach to."
   (+ (tab-header-height (keys kab)) (tab-body-height (timesig kab) num-measures)))
 
-(defun tab-width (num-keys)
-  (* +tabnote-width+ num-keys))
+(defun tab-bottom (kab num-measures)
+  "Return the bottom y postiion of the tab."
+  (+ (tab-top) (tab-bar-height kab num-measures) +font-size+))
 
 (defun draw-tab-bar (kab scene num-measures)
   "Draw bars where notes will reside and text labels to signal the keys' notes."
-  (let* ((num-keys (keys kab))
-         (left-x +tab-margin-x+)
-         (top-y +tab-margin-y+)
-         (body-height (tab-body-height (timesig kab) num-measures))
-         (body-bottom-y (+ top-y body-height)))
+  (loop :with num-keys := (keys kab)
+        :with timesig := (timesig kab)
 
-    (loop :for key :from 1 :upto (keys kab)
-          :for x := (+ left-x (* +tabnote-width+ (key-position key num-keys)))
-          :for offset-height := (* +tabnote-offset-y+ (floor (- num-keys key) 2))
-          :for markedp := (markedp key)
+        :with tab-top := (tab-top)
+        :with tab-left := (tab-left)
+        :with body-height := (tab-body-height timesig num-measures)
+        :with body-bottom := (tab-body-bottom timesig num-measures)
 
-          :do (progn
-                ;; Draw the key space
-                (cl-svg:draw scene (:rect :x x :y +tab-margin-y+
-                                          :width +tabnote-width+ :height (+ body-height offset-height))
-                             :fill (if markedp
-                                       +tabnote-marked+
-                                       +tabnote-color+) :stroke "black")
+        :for key :from 1 :upto num-keys
+        :for x := (+ tab-left (* +tabnote-width+ (key-position key num-keys)))
+        :for offset-height := (* +tabnote-offset-y+ (floor (- num-keys key) 2))
+        :for markedp := (markedp key)
 
-                ;; Draw the pitch label
-                (cl-svg:text scene (:x (+ x (/ +tabnote-width+ 2))
-                                    :y (+ body-bottom-y offset-height +font-size+)
-                                    :style +note-text-style+)
-                  (string (key-note key)))))))
+        ;; Draw the key space
+        :do (cl-svg:draw scene
+                (:rect :x x :y tab-top
+                       :width +tabnote-width+
+                       :height (+ body-height offset-height))
+                :fill (if markedp
+                          +tabnote-marked+
+                          +tabnote-color+)
+                :stroke "black")
+
+        ;; Draw the pitch label
+        :do  (cl-svg:text scene (:x (+ x (/ +tabnote-width+ 2))
+                                 :y (+ body-bottom offset-height +font-size+)
+                                 :style +note-text-style+)
+               (string (key-pitch key)))))
+
+(defun measure-bottom (num-measure timesig tab-measures)
+  "Return the y position of the bottom of the given measure."
+  (- (tab-body-bottom timesig tab-measures)
+     (* (1- num-measure) (measure-height timesig))))
 
 (defun draw-measure (scene measure num-measure tab-measures timesig num-keys)
   "Draw the measure bar."
-  (let* ((measure-bottom (- (+ +tab-margin-y+ (tab-body-height timesig tab-measures))
-                            (* (1- num-measure) (measure-height timesig))))
-         (tab-left +tab-margin-x+)
-         (tab-right (+ tab-left (tab-width num-keys))))
+  (declare (ignore measure))
 
+  (let ((measure-bottom (measure-bottom num-measure timesig tab-measures))
+        (tab-left (tab-left))
+        (tab-right (tab-right num-keys)))
 
     ;; measure line
     (cl-svg:draw scene (:line :x1 tab-left :x2 tab-right
@@ -109,9 +141,9 @@
 
 (defun print-kab (kab &optional (stream *standard-output*))
   (let* ((num-measures (length (measures kab)))
-         (tab-width (* +tabnote-width+ (keys kab)))
-         (width (+ tab-width (* 2 +tab-margin-x+)))
-         (height (+ (tab-bar-height kab num-measures) (* 2 +tab-margin-y+)))
+         (num-keys (keys kab))
+         (width (+ (tab-right num-keys) +tab-margin-x+))
+         (height (+ (tab-bottom kab num-measures) +tab-margin-y+))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width :height height)))
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
