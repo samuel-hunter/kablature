@@ -12,8 +12,8 @@
            :title
            :timesig
            :constructs
-           :measures
-           :beats-per-measure
+           :bars
+           :beats-per-bar
            :beat-root
            :beat-length))
 
@@ -52,9 +52,9 @@
   ((title :type string :reader title :initarg :title)
    (keys :type integer :reader keys :initarg :keys)
    (timesig :type (cons integer integer) :reader timesig :initarg :timesig)
-   (measures :reader measures :initarg :measures)))
+   (bars :reader bars :initarg :bars)))
 
-(defun beats-per-measure (timesig)
+(defun beats-per-bar (timesig)
   (car timesig))
 
 (defun beat-root (timesig)

@@ -4,31 +4,36 @@
 
 (in-package #:kablature.print)
 
-(defparameter +octave-notes+ "ABCDEFG" "Letters used in each octave")
-(defparameter +octave-root+ (position #\C +octave-notes+ :test 'char-equal) "Letter at Key 1")
+(defparameter +octave-notes+ "ABCDEFG"
+  "Letters used in each octave")
+(defparameter +octave-root+ (position #\C +octave-notes+ :test 'char-equal)
+  "Letter at Key 1")
 
-(defparameter +tabnote-offset-y+ 5)
-(defparameter +tabnote-width+ 15)
-(defparameter +tabnote-color+ "white")
-(defparameter +tabnote-marked+ "salmon")
+(defparameter +space-offset-y+ 5)
+(defparameter +space-width+ 15)
+(defparameter +space-color-unmarked+ "white")
+(defparameter +space-color-marked+ "salmon")
 
-(defparameter +measure-thickness+ 3)
-(defparameter +font-size+ 15)
+(defparameter +bar-line-thickness+ 3)
+(defparameter +bar-label-margin+ 5)
 
 (defparameter +note-thickness+ 1)
 (defparameter +note-radius+ 4)
 (defparameter +stem-outreach+ 20)
-(defparameter +beat-height+ (* 2 +tabnote-width+))
-(defparameter +taper-length+ 5)
+(defparameter +stem-taper-length+ 5)
 
-(defparameter +tab-margin-x+ 50)
-(defparameter +tab-margin-y+ 10)
-(defparameter +measure-text-margin+ 5)
+(defparameter +beat-height+ (* 2 +space-width+))
 
-(defparameter +text-style+ (format nil "+font-size+:~A;fill:black" +font-size+))
-(defparameter +measure-color+ "black")
+(defparameter +staff-margin-x+ 50)
+(defparameter +staff-margin-y+ 10)
 
-(defparameter +note-text-style+ (concatenate 'string +text-style+ ";text-anchor:middle"))
+(defparameter +font-size+ 15)
+(defparameter +text-style+
+  (format nil "+font-size+:~A;fill:black" +font-size+))
+(defparameter +bar-color+ "black")
+
+(defparameter +note-text-style+
+  (concatenate 'string +text-style+ ";text-anchor:middle"))
 
 (defun key-position (key num-keys)
   "Return the position of the key on the tablature, starting left."
@@ -37,106 +42,108 @@
         (+ root-index (floor key 2))
         (- root-index (/ key 2)))))
 
-(defun max-tab-header-offset (num-keys)
-  "Return the height the first key reaches out in the header."
-  (* +tabnote-offset-y+ (floor num-keys 2)))
+(defun max-staff-header-offset (num-keys)
+  "Return the height the middle key reaches out in the staff header."
+  (* +space-offset-y+ (floor num-keys 2)))
 
-(defun tab-header-height (num-keys)
-  (+ +font-size+ (max-tab-header-offset num-keys)))
+(defun staff-header-height (num-keys)
+  (+ +font-size+ (max-staff-header-offset num-keys)))
 
 (defun markedp (key)
+  "Return whether the key's space should be marked."
   (zerop (mod (floor key 2) 3)))
 
 (defun key-pitch (key)
-  "Return the pitch associated with the key."
+  "Return the pitch letter associated with the key."
   (char +octave-notes+ (mod (+ key +octave-root+ -1) (length +octave-notes+))))
 
-(defun measure-height (timesig)
-  "Return the height of a measure in a tablature bar."
-  (* (1+ (beats-per-measure timesig)) ; 1+ for the measure bar.
+(defun bar-height (timesig)
+  "Return the height of a bar in the tablature."
+  (* (1+ (beats-per-bar timesig)) ; 1+ for the bar line.
      +beat-height+))
 
-(defun tab-left ()
-  "Return the left x position of the tab."
-  +tab-margin-x+)
+(defun staff-left ()
+  "Return the left x position of the staff."
+  +staff-margin-x+)
 
-(defun tab-width (num-keys)
-  "Return the width of the tab."
-  (* +tabnote-width+ num-keys))
+(defun staff-width (num-keys)
+  "Return the width of a staff."
+  (* +space-width+ num-keys))
 
-(defun tab-right (num-keys)
-  "Return the right x position of the tab."
-  (+ (tab-left) (tab-width num-keys)))
+(defun staff-right (num-keys)
+  "Return the right x position of the staff."
+  (+ (staff-left) (staff-width num-keys)))
 
-(defun tab-top ()
-  "Return the top y position of the tab."
-  +tab-margin-x+)
+(defun staff-top ()
+  "Return the top y position of the staff."
+  +staff-margin-x+)
 
-(defun tab-body-height (timesig num-measures)
-  "Return the height of the tab body."
-  (* (measure-height timesig) num-measures))
+(defun staff-body-height (timesig num-bars)
+  "Return the height of the staff body."
+  (* (bar-height timesig) num-bars))
 
-(defun tab-body-bottom (timesig num-measures)
-  "Return the bottom y position of the tab body."
-  (+ (tab-top) (tab-body-height timesig num-measures)))
+(defun staff-body-bottom (timesig num-bars)
+  "Return the bottom y position of the staff body."
+  (+ (staff-top) (staff-body-height timesig num-bars)))
 
-(defun tab-bar-height (kab num-measures)
-  "Return the height the tab bar  with the MEASURES will reach to."
-  (+ (tab-header-height (keys kab)) (tab-body-height (timesig kab) num-measures)))
+(defun staff-height (tab num-bars)
+  "Return the height of the whole staff."
+  (+ (staff-header-height (keys tab))
+     (staff-body-height (timesig tab) num-bars)))
 
-(defun tab-bottom (kab num-measures)
-  "Return the bottom y postiion of the tab."
-  (+ (tab-top) (tab-bar-height kab num-measures) +font-size+))
+(defun staff-bottom (tab num-bars)
+  "Return the bottom y postiion of the staff."
+  (+ (staff-top) (staff-height tab num-bars) +font-size+))
 
 (defun key-left (key num-keys)
   "Return the x position of the left portion of the key."
-  (+ (tab-left) (* +tabnote-width+ (key-position key num-keys))))
+  (+ (staff-left) (* +space-width+ (key-position key num-keys))))
 
 (defun key-center-x (key num-keys)
-  (+ (key-left key num-keys) (/ +tabnote-width+ 2)))
+  (+ (key-left key num-keys) (/ +space-width+ 2)))
 
-(defun draw-tab-bar (kab scene num-measures)
-  "Draw bars where notes will reside and text labels to signal the keys' notes."
-  (loop :with num-keys := (keys kab)
-        :with timesig := (timesig kab)
+(defun draw-staff (tab scene num-bars)
+  "Draw the staff's spaces where notes will reside and text labels to signal the keys' notes."
+  (loop :with num-keys := (keys tab)
+        :with timesig := (timesig tab)
 
-        :with tab-top := (tab-top)
-        :with body-height := (tab-body-height timesig num-measures)
-        :with body-bottom := (tab-body-bottom timesig num-measures)
+        :with staff-top := (staff-top)
+        :with body-height := (staff-body-height timesig num-bars)
+        :with body-bottom := (staff-body-bottom timesig num-bars)
 
         :for key :from 1 :upto num-keys
         :for x := (key-left key num-keys)
-        :for offset-height := (* +tabnote-offset-y+ (floor (- num-keys key) 2))
+        :for offset-height := (* +space-offset-y+ (floor (- num-keys key) 2))
         :for markedp := (markedp key)
 
         ;; Draw the key space
         :do (cl-svg:draw scene
-                (:rect :x x :y tab-top
-                       :width +tabnote-width+
+                (:rect :x x :y staff-top
+                       :width +space-width+
                        :height (+ body-height offset-height))
                 :fill (if markedp
-                          +tabnote-marked+
-                          +tabnote-color+)
+                          +space-color-marked+
+                          +space-color-unmarked+)
                 :stroke "black")
 
         ;; Draw the pitch label
-        :do  (cl-svg:text scene (:x (+ x (/ +tabnote-width+ 2))
+        :do  (cl-svg:text scene (:x (+ x (/ +space-width+ 2))
                                  :y (+ body-bottom offset-height +font-size+)
                                  :style +note-text-style+)
                (string (key-pitch key)))))
 
-(defun measure-bottom (measure-num timesig tab-measures)
-  "Return the y position of the bottom of the given measure."
-  (- (tab-body-bottom timesig tab-measures)
-     (* measure-num (measure-height timesig))))
+(defun bar-bottom (bar-num timesig tab-bars)
+  "Return the y position of the bottom of the given bar."
+  (- (staff-body-bottom timesig tab-bars)
+     (* bar-num (bar-height timesig))))
 
-(defgeneric draw-construct (scene construct y kab))
+(defgeneric draw-construct (scene construct y tab))
 
-(defmethod draw-construct (scene (beamed beamed) y kab)
+(defmethod draw-construct (scene (beamed beamed) y tab)
   (print "No support for beamed constructs yet."))
 
 (defun stem-left ()
-  (- (tab-left) +stem-outreach+))
+  (- (staff-left) +stem-outreach+))
 
 (defun rightmost-key (chord tab-keys)
   (loop :for key :in (keys chord)
@@ -177,13 +184,13 @@
                    (format nil "~$,~$ ~$,~$ ~$,~$"
                            stem-right stem-y
                            stem-left stem-y
-                           (+ stem-left +taper-length+)
-                           (- stem-y +taper-length+)))
+                           (+ stem-left +stem-taper-length+)
+                           (- stem-y +stem-taper-length+)))
                  :stroke "black"
                  :stroke-width +note-thickness+
                  :fill "none")))
 
-(defmethod draw-construct (scene (chord chord) y kab)
+(defmethod draw-construct (scene (chord chord) note-y tab)
   (when (restp chord)
     (print "No support for rests, yet.")
     (return-from draw-construct))
@@ -192,54 +199,54 @@
   ;; style if so appropriate.
   (ecase (note chord)
     (1 nil) ; whole notes don't deserve a stem.
-    (2 (draw-untapered-stem scene chord (keys kab) y))
-    (4 (draw-untapered-stem scene chord (keys kab) y))
-    (8 (draw-tapered-stem   scene chord (keys kab) y)))
+    (2 (draw-untapered-stem scene chord (keys tab) note-y))
+    (4 (draw-untapered-stem scene chord (keys tab) note-y))
+    (8 (draw-tapered-stem   scene chord (keys tab) note-y)))
 
   ;; Cord noteheads
   (loop :with hollow-head := (member (note chord) '(1 2))
         :for key :in (keys chord)
-        :do (cl-svg:draw scene (:circle :cx (key-center-x key (keys kab))
-                                        :cy y
+        :do (cl-svg:draw scene (:circle :cx (key-center-x key (keys tab))
+                                        :cy note-y
                                         :r +note-radius+)
                          :fill (if hollow-head "none" "black")
                          :stroke "black"
                          :stroke-width +note-thickness+)))
 
-(defun draw-measure (scene kab measure-num tab-measures)
-  "Draw the measure bar."
-  (let* ((timesig (timesig kab))
-         (measure-bottom (measure-bottom measure-num timesig tab-measures))
-         (tab-left (tab-left))
-         (tab-right (tab-right (keys kab))))
+(defun draw-bar (scene tab bar-num tab-bars)
+  "Draw the bar's starting line and its notes."
+  (let* ((timesig (timesig tab))
+         (bar-bottom (bar-bottom bar-num timesig tab-bars))
+         (staff-left (staff-left))
+         (staff-right (staff-right (keys tab))))
 
-    ;; measure line
-    (cl-svg:draw scene (:line :x1 tab-left :x2 tab-right
-                              :y1 measure-bottom :y2 measure-bottom)
-                 :stroke-width +measure-thickness+
-                 :stroke +measure-color+)
-    ;; measure label
-    (cl-svg:text scene (:x (+ +measure-text-margin+ tab-right) :y measure-bottom
+    ;; bar line
+    (cl-svg:draw scene (:line :x1 staff-left :x2 staff-right
+                              :y1 bar-bottom :y2 bar-bottom)
+                 :stroke-width +bar-line-thickness+
+                 :stroke +bar-color+)
+    ;; bar label
+    (cl-svg:text scene (:x (+ +bar-label-margin+ staff-right) :y bar-bottom
                         :style +text-style+ :dominant-baseline "middle")
-      (write-to-string (1+ measure-num)))
+      (write-to-string (1+ bar-num)))
 
-    ;; measure constructs
-    (loop :for construct :in (nth measure-num (measures kab))
-          :with y := (- measure-bottom +beat-height+)
-          :do (draw-construct scene construct y kab)
-          :do (decf y (* +beat-height+
-                         (beat-length construct (beat-root timesig)))))))
+    ;; bar constructs
+    (loop :for construct :in (nth bar-num (bars tab))
+          :with note-y := (- bar-bottom +beat-height+)
+          :do (draw-construct scene construct note-y tab)
+          :do (decf note-y (* +beat-height+
+                              (beat-length construct (beat-root timesig)))))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
-  (let* ((num-measures (length (measures kab)))
+  (let* ((num-bars (length (bars kab)))
          (num-keys (keys kab))
-         (width (+ (tab-right num-keys) +tab-margin-x+))
-         (height (+ (tab-bottom kab num-measures) +tab-margin-y+))
+         (width (+ (staff-right num-keys) +staff-margin-x+))
+         (height (+ (staff-bottom kab num-bars) +staff-margin-y+))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width :height height)))
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
-    (draw-tab-bar kab scene num-measures)
-    (loop :for measure-num :upto (1- num-measures)
-          :do (draw-measure scene kab measure-num num-measures))
+    (draw-staff kab scene num-bars)
+    (loop :for bar-num :upto (1- num-bars)
+          :do (draw-bar scene kab bar-num num-bars))
     (cl-svg:stream-out stream scene)))

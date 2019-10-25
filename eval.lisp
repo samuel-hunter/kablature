@@ -26,23 +26,23 @@
       (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
 
 (defun group-constructs (constructs timesig)
-  "Group constructs together into measures."
-  (loop :with measures := ()
-        :with measure-constructs := ()
+  "Group constructs together into bars."
+  (loop :with bars := ()
+        :with bar-constructs := ()
         :with beats := 0
 
         :for construct :in constructs
         :do (incf beats (beat-length construct (beat-root timesig)))
-        :do (push construct measure-constructs)
+        :do (push construct bar-constructs)
         :do (cond
-              ((= beats (beats-per-measure timesig))
-               (push (nreverse measure-constructs) measures)
-               (setf measure-constructs ())
+              ((= beats (beats-per-bar timesig))
+               (push (nreverse bar-constructs) bars)
+               (setf bar-constructs ())
                (setf beats 0))
-              ((> beats (beats-per-measure timesig))
-               (error "Found ~S beats in measure ~S by construct ~S."
-                      beats (length measures) construct)))
-        :finally (return (nreverse measures))))
+              ((> beats (beats-per-bar timesig))
+               (error "Found ~S beats in bar ~S by construct ~S."
+                      beats (length bars) construct)))
+        :finally (return (nreverse bars))))
 
 (defun eval-kab (tab-sexp)
   (destructuring-bind (deftablature title proplist
@@ -58,6 +58,6 @@
                         :title title
                         :timesig timesig
                         :keys keys
-                        :measures
+                        :bars
                         (group-constructs constructs
                                           timesig)))))))
