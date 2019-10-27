@@ -41,7 +41,9 @@
    (staff-num :reader staff-num :initarg :num)
    (staff-body-bottom :reader staff-body-bottom :initarg :body-bottom)
    (bars :reader bars :initarg :bars)
-   (bar-length :reader bar-length :initarg :bar-length)))
+   (bar-length :reader bar-length :initarg :bar-length)
+   (bar-offset :reader bar-offset :initarg :bar-offset
+               :documentation "Number of bars that came before this staff.")))
 
 (defmethod timesig ((staff staff))
   (timesig (tab staff)))
@@ -114,7 +116,8 @@
                    :body-bottom (- (scene-height tab bar-length)
                                    +staff-margin-y+ (staff-header-height tab))
                    :bars (nthcdr (* bars-per-staff staff-num) (bars tab))
-                   :bar-length bar-length)))
+                   :bar-length bar-length
+                   :bar-offset (* bars-per-staff staff-num))))
 
 (defun key-position (key staff)
   "Return the position of the key on the tablature, starting left."
@@ -263,7 +266,7 @@
     ;; bar label
     (cl-svg:text scene (:x (+ +bar-label-margin+ staff-right) :y bar-bottom
                         :style +text-style+ :dominant-baseline "middle")
-      (write-to-string (1+ bar-num)))
+      (write-to-string (+ 1 bar-num (bar-offset staff))))
 
     ;; bar constructs
     (loop :for construct :in (nth bar-num (bars staff))
@@ -272,16 +275,24 @@
           :do (decf note-y (* +beat-height+
                               (beat-length construct (beat-root (timesig staff))))))))
 
-(defun print-kab (kab &optional (stream *standard-output*))
+(defun make-scene-and-staves (kab bars-per-staff)
   (let* ((num-bars (length (bars kab)))
-         (width (scene-width kab 1))
-         (height (scene-height kab num-bars))
+         (staves-per-tab (ceiling num-bars bars-per-staff))
+         (width (scene-width kab staves-per-tab))
+         (height (scene-height kab bars-per-staff))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
-                                          :width width :height height)))
-    (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
+                                          :width width
+                                          :height height)))
+    (cl-svg:draw scene (:rect :X 0 :y 0 :width width :height height)
                  :fill "white")
-    (let ((staff (make-staff kab scene 0 99999)))
-      (draw-staff staff)
-      (loop :for bar-num :upto (1- num-bars)
-            :do (draw-bar bar-num staff)))
+    (loop :for staff-num :upto (1- staves-per-tab)
+          :collect (make-staff kab scene staff-num bars-per-staff) :into staves
+          :finally (return (values scene staves)))))
+
+(defun print-kab (kab &optional (stream *standard-output*))
+  (multiple-value-bind (scene staves) (make-scene-and-staves kab 4)
+    (loop :for staff :in staves
+          :do (draw-staff staff)
+          :do (loop :for bar-num :upto (1- (bar-length staff))
+                    :do (draw-bar bar-num staff)))
     (cl-svg:stream-out stream scene)))
