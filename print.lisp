@@ -33,6 +33,12 @@
   (format nil "+font-size+:~A;fill:black" +font-size+))
 (defparameter +bar-color+ "black")
 
+(defparameter +scene-height-min+ 800
+  "The minimum height a singley-tabbed scene must be before being automatically split.")
+(defparameter +scene-target-ratio+ 16/9
+  "The target image resolution at which a scene should strive for.")
+;;; (defparameter +scene-target-ratio+ 683/384) ;)
+
 (defparameter +note-text-style+
   (concatenate 'string +text-style+ ";text-anchor:middle"))
 
@@ -110,9 +116,9 @@
   "Return the calculated height of the scene."
   (+ (* 2 +staff-margin-y+) (staff-height* tab bars-per-staff)))
 
-(defun scene-width (tab staffs-per-tab)
+(defun scene-width (tab staves-per-tab)
   "Return the calculated width of the scene."
-  (+ +staff-margin-x+ (* staffs-per-tab
+  (+ +staff-margin-x+ (* staves-per-tab
                          (+ +staff-margin-x+ (staff-width* tab)))))
 
 (defun make-staff (tab scene staff-num bars-per-staff)
@@ -283,22 +289,56 @@
           :do (draw-construct scene construct note-y staff)
           :do (decf note-y (construct-height construct)))))
 
+(defun staves-per-tab (tab bars-per-staff)
+  (ceiling (length (bars tab)) bars-per-staff))
+
 (defun make-scene-and-staves (kab bars-per-staff)
-  (let* ((num-bars (length (bars kab)))
-         (staves-per-tab (ceiling num-bars bars-per-staff))
+  (let* ((staves-per-tab (staves-per-tab kab bars-per-staff))
          (width (scene-width kab staves-per-tab))
          (height (scene-height kab bars-per-staff))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width
                                           :height height)))
-    (cl-svg:draw scene (:rect :X 0 :y 0 :width width :height height)
+    (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
     (loop :for staff-num :upto (1- staves-per-tab)
           :collect (make-staff kab scene staff-num bars-per-staff) :into staves
           :finally (return (values scene staves)))))
 
+(defun ideal-bars-per-staff (tab)
+  (let ((bar-length (length (bars tab))))
+    ;; Return early when the simple single-staff solution is short enough.
+    (when (< (scene-height tab bar-length)
+             +scene-height-min+)
+      (return-from ideal-bars-per-staff bar-length))
+
+
+    (labels ((ratio (bars-per-staff)
+               (/ (scene-width tab (staves-per-tab tab bars-per-staff))
+                  (scene-height tab bars-per-staff)))
+             (ratio-error (bars-per-staff)
+               (/ (abs (- (ratio bars-per-staff) +scene-target-ratio+))
+                  +scene-target-ratio+)))
+      (loop :with best-bars-per-staff := bar-length ; if something
+                                                    ; goes wrong and
+                                                    ; bars isn't set,
+                                                    ; default to one
+                                                    ; big stretch.
+            :with best-error := 9999 ; absurdly high percent error.
+            :for bars-per-staff :from 2 :to 12 :by 2 ; Even groupings
+                                                     ; to appeal to
+                                                     ; traditional
+                                                     ; western music
+            :for ratio-error := (ratio-error bars-per-staff)
+            :do (when (< ratio-error
+                         best-error)
+                  (setf best-bars-per-staff bars-per-staff)
+                  (setf best-error ratio-error))
+            :finally (return best-bars-per-staff)))
+    ))
+
 (defun print-kab (kab &optional (stream *standard-output*))
-  (multiple-value-bind (scene staves) (make-scene-and-staves kab 4)
+  (multiple-value-bind (scene staves) (make-scene-and-staves kab (ideal-bars-per-staff kab))
     (loop :for staff :in staves
           :do (draw-staff staff)
           :do (loop :for bar-num :upto (1- (bar-length staff))
