@@ -14,15 +14,16 @@
 (defparameter +space-color-unmarked+ "white")
 (defparameter +space-color-marked+ "salmon")
 
+(defparameter +whole-note-height+ (* 8 +space-width+))
+
 (defparameter +bar-line-thickness+ 3)
 (defparameter +bar-label-margin+ 5)
+(defparameter +bar-line-height+ (* +whole-note-height+ 1/8))
 
 (defparameter +note-thickness+ 1)
 (defparameter +note-radius+ 4)
 (defparameter +stem-outreach+ 20)
 (defparameter +stem-taper-length+ 5)
-
-(defparameter +beat-height+ (* 2 +space-width+))
 
 (defparameter +staff-margin-x+ 50)
 (defparameter +staff-margin-y+ 10)
@@ -48,10 +49,18 @@
 (defmethod timesig ((staff staff))
   (timesig (tab staff)))
 
+(defun note-height (duration)
+  "Return the height allocated to the given note's duration."
+  (* duration +whole-note-height+))
+
 (defun bar-height (timesig)
   "Return the height of a bar in the tablature."
-  (* (1+ (beats-per-bar timesig)) ; 1+ for the bar line.
-     +beat-height+))
+  (+ +bar-line-height+
+     (note-height (bar-duration timesig))))
+
+(defun construct-height (construct)
+  "Return the height of the construct."
+  (note-height (duration construct)))
 
 (defun staff-width* (tab)
   "Return the width of a staff."
@@ -270,10 +279,9 @@
 
     ;; bar constructs
     (loop :for construct :in (nth bar-num (bars staff))
-          :with note-y := (- bar-bottom +beat-height+)
+          :with note-y := (- bar-bottom +bar-line-height+)
           :do (draw-construct scene construct note-y staff)
-          :do (decf note-y (* +beat-height+
-                              (beat-length construct (beat-root (timesig staff))))))))
+          :do (decf note-y (construct-height construct)))))
 
 (defun make-scene-and-staves (kab bars-per-staff)
   (let* ((num-bars (length (bars kab)))

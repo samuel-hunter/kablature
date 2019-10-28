@@ -6,6 +6,7 @@
            :dottedp
            :keys
            :restp
+           :beat-length
            :beamed
            :chords
            :tablature
@@ -15,7 +16,7 @@
            :bars
            :beats-per-bar
            :beat-root
-           :beat-length))
+           :bar-duration))
 
 (in-package #:kablature.model)
 
@@ -60,3 +61,7 @@
 (defun beat-root (timesig)
   "Return the note which defines a beat in the tablature.."
   (cdr timesig))
+
+(defun bar-duration (timesig)
+  "Return the portion of a whole note that a bar holds with the given time signature."
+  (/ (beats-per-bar timesig) (beat-root timesig)))
