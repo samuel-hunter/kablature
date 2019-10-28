@@ -1,4 +1,4 @@
-(deftablature "Drunken Sailor" (:keys 17 :timesig (2 . 4))
+(deftablature "Drunken Sailor" (:keys 17 :timesig (4 . 4))
   (4 nil 6) (8 nil 6) (8 nil 6)
   (4 nil 6) (8 nil 6) (8 nil 6)
   (4 nil 6) (4 nil 2)
