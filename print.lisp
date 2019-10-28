@@ -25,6 +25,8 @@
 
 (defparameter +note-thickness+ 1)
 (defparameter +note-radius+ 4)
+(defparameter +note-dot-offset+ 6)
+(defparameter +note-dot-radius+ 2)
 (defparameter +stem-outreach+ 20)
 (defparameter +stem-taper-length+ 5)
 
@@ -215,11 +217,6 @@
   (- (staff-body-bottom staff)
      (* bar-num (bar-height (timesig staff)))))
 
-(defgeneric draw-construct (scene construct y staff))
-
-(defmethod draw-construct (scene (beamed beamed) y staff)
-  (print "No support for beamed constructs yet."))
-
 (defun stem-left (staff)
   (- (staff-left staff) +stem-outreach+))
 
@@ -268,6 +265,20 @@
                  :stroke-width +note-thickness+
                  :fill "none")))
 
+(defun draw-note-dot (scene key note-y staff)
+  (let ((dot-x (+ +note-dot-offset+
+                  (key-center-x key staff)))
+        (dot-y (- note-y +note-dot-offset+)))
+    (cl-svg:draw scene (:circle :cx dot-x
+                                :cy dot-y
+                                :r +note-dot-radius+)
+                 :fill "black")))
+
+(defgeneric draw-construct (scene construct y staff))
+
+(defmethod draw-construct (scene (beamed beamed) y staff)
+  (print "No support for beamed constructs yet."))
+
 (defmethod draw-construct (scene (chord chord) note-y staff)
   (when (restp chord)
     (print "No support for rests, yet.")
@@ -289,7 +300,9 @@
                                         :r +note-radius+)
                          :fill (if hollow-head "none" "black")
                          :stroke "black"
-                         :stroke-width +note-thickness+)))
+                         :stroke-width +note-thickness+)
+        :when (dottedp chord)
+          :do (draw-note-dot scene key note-y staff)))
 
 (defun draw-bar (bar-num staff)
   "Draw the bar's starting line and its notes."
