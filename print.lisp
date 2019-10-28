@@ -20,6 +20,9 @@
 (defparameter +bar-label-margin+ 5)
 (defparameter +bar-line-height+ (* +whole-note-height+ 1/8))
 
+(defparameter +conclusion-line-height+ (* +whole-note-height+ 1/8))
+(defparameter +conclusion-line-thickness+ +bar-line-thickness+)
+
 (defparameter +note-thickness+ 1)
 (defparameter +note-radius+ 4)
 (defparameter +stem-outreach+ 20)
@@ -50,7 +53,8 @@
    (bars :reader bars :initarg :bars)
    (bar-length :reader bar-length :initarg :bar-length)
    (bar-offset :reader bar-offset :initarg :bar-offset
-               :documentation "Number of bars that came before this staff.")))
+               :documentation "Number of bars that came before this staff.")
+   (last-staffp :reader last-staffp :initarg :last-staffp)))
 
 (defmethod timesig ((staff staff))
   (timesig (tab staff)))
@@ -78,8 +82,9 @@
 
 (defun staff-body-height* (timesig tab-bars)
   "Return the height of the staff body."
-  (* (bar-height timesig)
-     tab-bars))
+  (+ (* (bar-height timesig)
+        tab-bars)
+     +conclusion-line-height+))
 
 (defun staff-body-height (staff)
   "Return the height of the staff body."
@@ -123,7 +128,8 @@
 
 (defun make-staff (tab scene staff-num bars-per-staff)
   (let ((bar-length (min bars-per-staff (- (length (bars tab))
-                                           (* bars-per-staff staff-num)))))
+                                           (* bars-per-staff staff-num))))
+        (bar-offset (* bars-per-staff staff-num)))
     (make-instance 'staff
                    :tab tab
                    :scene scene
@@ -132,7 +138,9 @@
                                    +staff-margin-y+ (staff-header-height tab))
                    :bars (nthcdr (* bars-per-staff staff-num) (bars tab))
                    :bar-length bar-length
-                   :bar-offset (* bars-per-staff staff-num))))
+                   :bar-offset bar-offset
+                   :last-staffp (= (+ bar-offset bar-length)
+                                   (length (bars tab))))))
 
 (defun key-position (key staff)
   "Return the position of the key on the tablature, starting left."
@@ -155,6 +163,21 @@
 
 (defun key-center-x (key staff)
   (+ (key-left key staff) (/ +space-width+ 2)))
+
+(defun draw-conclusion-line (staff)
+  "Draw the ending lines on the staff that illustrates the end of the song."
+  (let* ((scene (scene staff))
+         (staff-top (staff-top staff))
+         (staff-left (staff-left staff))
+         (staff-right (staff-right staff))
+         (double-bar-y (+ staff-top 10)))
+    (cl-svg:draw scene (:line :x1 staff-left :y1 staff-top
+                              :x2 staff-right :y2 staff-top)
+                 :stroke-width +conclusion-line-thickness+
+                 :stroke "black")
+    (cl-svg:draw scene (:line :x1 staff-left :y1 double-bar-y
+                              :x2 staff-right :y2 double-bar-y)
+                 :stroke "black")))
 
 (defun draw-staff (staff)
   "Draw the staff's spaces where notes will reside and text labels to signal the keys' notes."
@@ -183,7 +206,9 @@
         :do  (cl-svg:text scene (:x (+ x (/ +space-width+ 2))
                                  :y (+ body-bottom offset-height +font-size+)
                                  :style +note-text-style+)
-               (string (key-pitch key)))))
+               (string (key-pitch key))))
+  (when (last-staffp staff)
+    (draw-conclusion-line staff)))
 
 (defun bar-bottom (bar-num staff)
   "Return the y position of the bottom of the given bar."
