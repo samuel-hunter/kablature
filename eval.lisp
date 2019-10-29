@@ -21,8 +21,8 @@
 (defun make-construct (sexp)
   (let ((first-elem (first sexp)))
     (cond
-      ((eq 'beamed first-elem) (make-beamed sexp))
       ((typep first-elem 'integer) (make-chord sexp))
+      ((string-equal "BEAMED" (string first-elem)) (make-beamed sexp))
       (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
 
 (defun group-constructs (constructs timesig)
