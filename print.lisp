@@ -30,6 +30,9 @@
 (defparameter +stem-outreach+ 20)
 (defparameter +stem-taper-length+ 5)
 
+(defparameter +hat-height+ 10)
+(defparameter +quarter-rest-thickness+ 2)
+
 (defparameter +staff-margin-x+ 50)
 (defparameter +staff-margin-y+ 10)
 
@@ -163,6 +166,9 @@
   "Return the x position of the left portion of the key."
   (+ (staff-left staff) (* +space-width+ (key-position key staff))))
 
+(defun staff-center (staff)
+  (key-left 1 staff))
+
 (defun key-center-x (key staff)
   (+ (key-left key staff) (/ +space-width+ 2)))
 
@@ -279,9 +285,77 @@
 (defmethod draw-construct (scene (beamed beamed) y staff)
   (print "No support for beamed constructs yet."))
 
+(defun draw-hat (note-y staff direction key dottedp)
+  (let ((x (ecase direction
+             (:left (key-left key staff))
+             (:right (+ (/ +space-width+ 2)
+                        (key-left key staff)))))
+        (scene (scene staff)))
+    (cl-svg:draw scene (:rect :x x :y note-y
+                                      :width (/ +space-width+ 2)
+                                      :height +hat-height+))
+    (when dottedp
+      (draw-note-dot scene key note-y staff))))
+
+(defun draw-whole-rest (note-y staff dottedp)
+  (draw-hat note-y staff :left 4 dottedp)
+  (draw-hat note-y staff :left 7 dottedp))
+
+(defun draw-half-rest (note-y staff dottedp)
+  (draw-hat note-y staff :right 6 dottedp)
+  (draw-hat note-y staff :right 5 dottedp))
+
+(defun draw-quarter-rest (note-y staff dottedp)
+  (let* ((start-x (staff-center staff))
+         ; polylines require the points formatted in an X,Y X,Y pattern.
+         (points (format nil "~$,~$ ~$,~$ ~$,~$ ~$,~$ ~$,~$ ~$,~$"
+                       start-x note-y
+                       (+ start-x (* 1/2 +space-width+)) (- note-y 4)
+                       (+ start-x +space-width+) note-y
+                       (+ start-x (* 4/3 +space-width+)) (- note-y 4)
+                       (+ start-x (* 5/3 +space-width+)) note-y
+                       (+ start-x (* 2 +space-width+)) (- note-y 2))))
+    (cl-svg:draw (scene staff) (:polyline :points points)
+                 :stroke "black"
+                 :stroke-width +quarter-rest-thickness+
+                 :fill "none"))
+  (when dottedp
+    (draw-note-dot (scene staff) 3 note-y staff)))
+
+(defun draw-eighth-rest (note-y staff)
+  (let ((scene (scene staff))
+        (half-height (/ +space-width+ 2)))
+    (cl-svg:draw scene (:line :x1 (key-center-x 4 staff)
+                              :y1 (+ note-y half-height)
+                              :x2 (key-center-x 6 staff)
+                              :y2 (- note-y half-height))
+                 :stroke "black")
+    (cl-svg:draw scene (:circle :cx (+ (key-center-x 6 staff)
+                                       (* 3/16 +space-width+))
+                                :cy (- note-y
+                                       (* 1/8 +space-width+))
+                                :r (* 1/8 +space-width+))
+                 :fill "black")
+    (cl-svg:draw scene (:line :x1 (key-center-x 5 staff)
+                              :y1 (+ note-y half-height)
+                              :x2 (key-center-x 3 staff)
+                              :y2 (- note-y half-height))
+                 :stroke "black")
+    (cl-svg:draw scene (:circle :cx (+ (key-center-x 3 staff)
+                                       (* 3/16 +space-width+))
+                                :cy (- note-y
+                                       (* 1/8 +space-width+))
+                                :r (* 1/8 +space-width+))
+                 :fill "black")))
+
 (defmethod draw-construct (scene (chord chord) note-y staff)
   (when (restp chord)
-    (print "No support for rests, yet.")
+    (with-slots (dottedp) chord
+      (ecase (note chord)
+        (1 (draw-whole-rest note-y staff dottedp))
+        (2 (draw-half-rest note-y staff dottedp))
+        (4 (draw-quarter-rest note-y staff dottedp))
+        (8 (draw-eighth-rest note-y staff))))
     (return-from draw-construct))
 
   ;; Appropriately draw the approrpiate chord stem in the appropriate
