@@ -244,21 +244,22 @@
   "Return the y-position of the note's stem."
   (+ (- note-y +note-radius+)))
 
-(defun draw-untapered-stem (scene chord note-y staff)
+(defun draw-untapered-stem (chord note-y staff)
   (let ((stem-left (stem-left staff))
         (stem-right (stem-right chord staff))
         (stem-y (stem-y note-y)))
 
-    (cl-svg:draw scene (:line :x1 stem-left :y1 stem-y
-                              :x2 stem-right :y2 stem-y)
-                 :stroke "black"
-                 :stroke-width +note-thickness+)))
+    (cl-svg:draw (scene staff)
+        (:line :x1 stem-left :y1 stem-y
+               :x2 stem-right :y2 stem-y)
+        :stroke "black"
+        :stroke-width +note-thickness+)))
 
-(defun draw-tapered-stem (scene chord note-y staff)
+(defun draw-tapered-stem (chord note-y staff)
   (let ((stem-left (stem-left staff))
         (stem-right (stem-right chord staff))
         (stem-y (stem-y note-y)))
-    (cl-svg:draw scene
+    (cl-svg:draw (scene staff)
         (:polyline :points
                    ;; points polyline attribute expect a "x,y x,y..."
                    ;; string.
@@ -271,18 +272,18 @@
                  :stroke-width +note-thickness+
                  :fill "none")))
 
-(defun draw-note-dot (scene key note-y staff)
+(defun draw-note-dot (key note-y staff)
   (let ((dot-x (+ +note-dot-offset+
                   (key-center-x key staff)))
         (dot-y (- note-y +note-dot-offset+)))
-    (cl-svg:draw scene (:circle :cx dot-x
+    (cl-svg:draw (scene staff) (:circle :cx dot-x
                                 :cy dot-y
                                 :r +note-dot-radius+)
                  :fill "black")))
 
-(defgeneric draw-construct (scene construct y staff))
+(defgeneric draw-construct (construct y staff))
 
-(defmethod draw-construct (scene (beamed beamed) y staff)
+(defmethod draw-construct ((beamed beamed) y staff)
   (print "No support for beamed constructs yet."))
 
 (defun draw-hat (note-y staff direction key dottedp)
@@ -295,7 +296,7 @@
                                       :width (/ +space-width+ 2)
                                       :height +hat-height+))
     (when dottedp
-      (draw-note-dot scene key note-y staff))))
+      (draw-note-dot key note-y staff))))
 
 (defun draw-whole-rest (note-y staff dottedp)
   (draw-hat note-y staff :left 4 dottedp)
@@ -320,7 +321,7 @@
                  :stroke-width +quarter-rest-thickness+
                  :fill "none"))
   (when dottedp
-    (draw-note-dot (scene staff) 3 note-y staff)))
+    (draw-note-dot 3 note-y staff)))
 
 (defun draw-eighth-rest (note-y staff)
   (let ((scene (scene staff))
@@ -348,7 +349,7 @@
                                 :r (* 1/8 +space-width+))
                  :fill "black")))
 
-(defmethod draw-construct (scene (chord chord) note-y staff)
+(defmethod draw-construct ((chord chord) note-y staff)
   (when (restp chord)
     (with-slots (dottedp) chord
       (ecase (note chord)
@@ -362,12 +363,13 @@
   ;; style if so appropriate.
   (ecase (note chord)
     (1 nil) ; whole notes don't deserve a stem.
-    (2 (draw-untapered-stem scene chord note-y staff))
-    (4 (draw-untapered-stem scene chord note-y staff))
-    (8 (draw-tapered-stem   scene chord note-y staff)))
+    (2 (draw-untapered-stem chord note-y staff))
+    (4 (draw-untapered-stem chord note-y staff))
+    (8 (draw-tapered-stem   chord note-y staff)))
 
   ;; Cord noteheads
   (loop :with hollow-head := (member (note chord) '(1 2))
+        :with scene := (scene staff)
         :for key :in (keys chord)
         :do (cl-svg:draw scene (:circle :cx (key-center-x key staff)
                                         :cy note-y
@@ -376,7 +378,7 @@
                          :stroke "black"
                          :stroke-width +note-thickness+)
         :when (dottedp chord)
-          :do (draw-note-dot scene key note-y staff)))
+          :do (draw-note-dot key note-y staff)))
 
 (defun draw-bar (bar-num staff)
   "Draw the bar's starting line and its notes."
@@ -398,7 +400,7 @@
     ;; bar constructs
     (loop :for construct :in (nth bar-num (bars staff))
           :with note-y := (- bar-bottom +bar-line-height+)
-          :do (draw-construct scene construct note-y staff)
+          :do (draw-construct construct note-y staff)
           :do (decf note-y (construct-height construct)))))
 
 (defun staves-per-tab (tab bars-per-staff)
