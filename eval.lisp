@@ -48,8 +48,13 @@
   (destructuring-bind (deftablature title proplist
                        &body construct-sexps) tab-sexp
     (assert (string-equal (string deftablature) "DEFTABLATURE"))
+    (check-type title string)
+
     (let ((timesig (getf proplist :timesig (cons 4 4)))
           (keys (getf proplist :keys 17)))
+      (check-type timesig (cons integer integer))
+      (check-type keys integer)
+
       (loop :for sexp :in construct-sexps
             :collect (make-construct sexp) :into constructs
             :finally (return
