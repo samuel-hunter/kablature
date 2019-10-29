@@ -215,6 +215,14 @@
                                  :y (+ body-bottom offset-height +font-size+)
                                  :style +note-text-style+)
                (string (key-pitch key))))
+
+  ;; Draw thick line down middle of staff
+  (cl-svg:draw (scene staff)
+      (:line :x1 (staff-center staff) :y1 (staff-top staff)
+             :x2 (staff-center staff) :y2 (+ (staff-body-bottom staff)
+                                             (max-staff-header-offset (tab staff))))
+      :stroke "black"
+      :stroke-width +bar-line-thickness+)
   (when (last-staffp staff)
     (draw-conclusion-line staff)))
 
