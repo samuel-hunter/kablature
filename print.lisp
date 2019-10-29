@@ -29,6 +29,7 @@
 (defparameter +note-dot-radius+ 2)
 (defparameter +stem-outreach+ 20)
 (defparameter +stem-taper-length+ 5)
+(defparameter +beam-thickness+ 2)
 
 (defparameter +hat-height+ 10)
 (defparameter +quarter-rest-thickness+ 2)
@@ -289,11 +290,6 @@
                                 :r +note-dot-radius+)
                  :fill "black")))
 
-(defgeneric draw-construct (construct y staff))
-
-(defmethod draw-construct ((beamed beamed) y staff)
-  (print "No support for beamed constructs yet."))
-
 (defun draw-hat (note-y staff direction key dottedp)
   (let ((x (ecase direction
              (:left (key-left key staff))
@@ -316,7 +312,7 @@
 
 (defun draw-quarter-rest (note-y staff dottedp)
   (let* ((start-x (staff-center staff))
-         ; polylines require the points formatted in an X,Y X,Y pattern.
+         ; polylines require the points formatted in an X,Y X,Y... pattern.
          (points (format nil "~$,~$ ~$,~$ ~$,~$ ~$,~$ ~$,~$ ~$,~$"
                        start-x note-y
                        (+ start-x (* 1/2 +space-width+)) (- note-y 4)
@@ -357,6 +353,21 @@
                                 :r (* 1/8 +space-width+))
                  :fill "black")))
 
+(defun draw-note-heads (chord note-y staff)
+  (loop :with hollow-head := (member (note chord) '(1 2))
+        :with scene := (scene staff)
+        :for key :in (keys chord)
+        :do (cl-svg:draw scene (:circle :cx (key-center-x key staff)
+                                        :cy note-y
+                                        :r +note-radius+)
+                         :fill (if hollow-head "none" "black")
+                         :stroke "black"
+                         :stroke-width +note-thickness+)
+        :when (dottedp chord)
+          :do (draw-note-dot key note-y staff)))
+
+(defgeneric draw-construct (construct note-y staff))
+
 (defmethod draw-construct ((chord chord) note-y staff)
   (when (restp chord)
     (with-slots (dottedp) chord
@@ -375,18 +386,27 @@
     (4 (draw-untapered-stem chord note-y staff))
     (8 (draw-tapered-stem   chord note-y staff)))
 
-  ;; Cord noteheads
-  (loop :with hollow-head := (member (note chord) '(1 2))
-        :with scene := (scene staff)
-        :for key :in (keys chord)
-        :do (cl-svg:draw scene (:circle :cx (key-center-x key staff)
-                                        :cy note-y
-                                        :r +note-radius+)
-                         :fill (if hollow-head "none" "black")
-                         :stroke "black"
-                         :stroke-width +note-thickness+)
-        :when (dottedp chord)
-          :do (draw-note-dot key note-y staff)))
+  (draw-note-heads chord note-y staff))
+
+(defmethod draw-construct ((beamed beamed) note-y staff)
+  (dolist (chord (chords beamed))
+    (assert (member (note chord) '(8 16))))
+
+  (let (last-chord-y)
+    (loop :for chord :in (chords beamed)
+          :for chord-y := note-y :then (- chord-y (construct-height chord))
+          :do (draw-untapered-stem chord chord-y staff)
+          :do (draw-note-heads chord chord-y staff)
+          :finally (setf last-chord-y chord-y))
+    ;; beam
+    (let ((beam-x (stem-left staff))
+          (beam-bottom (+ (stem-y note-y) (/ +note-thickness+ 2)))
+          (beam-top (- (stem-y last-chord-y) (/ +note-thickness+ 2))))
+      (cl-svg:draw (scene staff)
+          (:line :x1 beam-x :y1 beam-bottom
+                 :x2 beam-x :y2 beam-top)
+          :stroke "black"
+          :stroke-width +beam-thickness+))))
 
 (defun draw-bar (bar-num staff)
   "Draw the bar's starting line and its notes."
