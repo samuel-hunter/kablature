@@ -14,7 +14,7 @@
 (defparameter +space-color-unmarked+ "white")
 (defparameter +space-color-marked+ "salmon")
 
-(defparameter +whole-note-height+ (* 8 +space-width+))
+(defparameter +whole-note-height+ (* 12 +space-width+))
 
 (defparameter +bar-line-thickness+ 3)
 (defparameter +bar-label-margin+ 5)
@@ -29,6 +29,7 @@
 (defparameter +note-dot-radius+ 2)
 (defparameter +stem-outreach+ 20)
 (defparameter +stem-taper-length+ 5)
+(defparameter +aux-taper-distance+ 5)
 (defparameter +beam-thickness+ 2)
 
 (defparameter +hat-height+ 10)
@@ -264,7 +265,7 @@
         :stroke "black"
         :stroke-width +note-thickness+)))
 
-(defun draw-tapered-stem (chord note-y staff)
+(defun draw-tapered-stem (chord note-y staff &key (aux-tapers 0))
   (let ((stem-left (stem-left staff))
         (stem-right (stem-right chord staff))
         (stem-y (stem-y note-y)))
@@ -279,7 +280,15 @@
                            (- stem-y +stem-taper-length+)))
                  :stroke "black"
                  :stroke-width +note-thickness+
-                 :fill "none")))
+                 :fill "none")
+    (loop :for aux-taper :from 1 :to aux-tapers
+          :for aux-left := (+ stem-left +aux-taper-distance+)
+          :do (cl-svg:draw (scene staff)
+                  (:line :x1 aux-left :y1 stem-y
+                         :x2 (+ aux-left +stem-taper-length+)
+                         :y2 (- stem-y +stem-taper-length+))
+                  :stroke "black"
+                  :stroke-width +note-thickness+))))
 
 (defun draw-note-dot (key note-y staff)
   (let ((dot-x (+ +note-dot-offset+
@@ -327,7 +336,7 @@
   (when dottedp
     (draw-note-dot 3 note-y staff)))
 
-(defun draw-eighth-rest (note-y staff)
+(defun draw-stemmed-rest (note-y staff dottedp &key (heads 1))
   (let ((scene (scene staff))
         (half-height (/ +space-width+ 2)))
     (cl-svg:draw scene (:line :x1 (key-center-x 4 staff)
@@ -335,23 +344,32 @@
                               :x2 (key-center-x 6 staff)
                               :y2 (- note-y half-height))
                  :stroke "black")
-    (cl-svg:draw scene (:circle :cx (+ (key-center-x 6 staff)
-                                       (* 3/16 +space-width+))
-                                :cy (- note-y
-                                       (* 1/8 +space-width+))
-                                :r (* 1/8 +space-width+))
-                 :fill "black")
     (cl-svg:draw scene (:line :x1 (key-center-x 5 staff)
                               :y1 (+ note-y half-height)
                               :x2 (key-center-x 3 staff)
                               :y2 (- note-y half-height))
                  :stroke "black")
-    (cl-svg:draw scene (:circle :cx (+ (key-center-x 3 staff)
-                                       (* 3/16 +space-width+))
-                                :cy (- note-y
-                                       (* 1/8 +space-width+))
-                                :r (* 1/8 +space-width+))
-                 :fill "black")))
+    (loop :for head :to (1- heads)
+          :for head-offset := (* 2/8 +space-width+ head)
+          :do (cl-svg:draw scene (:circle :cx (+ (key-center-x 6 staff)
+                                                 (* 3/16 +space-width+)
+                                                 head-offset)
+                                          :cy (+ note-y
+                                                 (* -1/8 +space-width+)
+                                                 head-offset)
+                                          :r (* 1/8 +space-width+))
+                           :fill "black")
+          :do (cl-svg:draw scene (:circle :cx (+ (key-center-x 3 staff)
+                                                 (* 3/16 +space-width+)
+                                                 head-offset)
+                                          :cy (+ note-y
+                                                 (* -1/8 +space-width+)
+                                                 head-offset)
+                                          :r (* 1/8 +space-width+))
+                           :fill "black")))
+  (when dottedp
+    (draw-note-dot 6 note-y staff)
+    (draw-note-dot 3 note-y staff)))
 
 (defun draw-note-heads (chord note-y staff)
   (loop :with hollow-head := (member (note chord) '(1 2))
@@ -375,16 +393,18 @@
         (1 (draw-whole-rest note-y staff dottedp))
         (2 (draw-half-rest note-y staff dottedp))
         (4 (draw-quarter-rest note-y staff dottedp))
-        (8 (draw-eighth-rest note-y staff))))
+        (8 (draw-stemmed-rest note-y staff dottedp))
+        (16 (draw-stemmed-rest note-y staff dottedp :heads 2))))
     (return-from draw-construct))
 
   ;; Appropriately draw the approrpiate chord stem in the appropriate
   ;; style if so appropriate.
   (ecase (note chord)
     (1 nil) ; whole notes don't deserve a stem.
-    (2 (draw-untapered-stem chord note-y staff))
-    (4 (draw-untapered-stem chord note-y staff))
-    (8 (draw-tapered-stem   chord note-y staff)))
+    (2  (draw-untapered-stem chord note-y staff))
+    (4  (draw-untapered-stem chord note-y staff))
+    (8  (draw-tapered-stem   chord note-y staff))
+    (16 (draw-tapered-stem   chord note-y staff :aux-tapers 1)))
 
   (draw-note-heads chord note-y staff))
 
