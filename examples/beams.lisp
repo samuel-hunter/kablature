@@ -1,4 +1,23 @@
 (deftablature "Beamed Notes Example" (:keys 17 :timesig (4 . 4))
   (beamed
-   (8 nil 1) (8 nil 3) (8 nil 4) (8 nil 6))
-  (2 nil 7))
+   (8 nil 1) (8 nil 1) (8 nil 1) (8 nil 1))
+  (beamed
+   (16 nil 1) (16 nil 1) (16 nil 1) (16 nil 1))
+  (beamed
+   (16 nil 1) (16 nil 1) (16 nil 1) (16 nil 1))
+
+  (beamed
+   (16 nil 1) (8 nil 1))
+  (beamed
+   (8 nil 1) (16 nil 1))
+  (beamed
+   (16 nil 1) (8 nil 1) (16 nil 1))
+  (beamed
+   (8 nil 1) (16 nil 1) (8 nil 1))
+  (16 nil 1)
+
+  (beamed
+   (8 t 1) (16 nil 1) (8 nil 1) (8 nil 1))
+  (4 nil 1)
+  (beamed
+   (8 t 1) (16 nil 1)))
