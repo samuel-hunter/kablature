@@ -31,6 +31,8 @@
 (defparameter +stem-taper-length+ 5)
 (defparameter +aux-taper-distance+ 5)
 (defparameter +beam-thickness+ 2)
+(defparameter +double-beam-offset+ 4
+  "Distance from first beam to second beam for sixteenth notes")
 
 (defparameter +hat-height+ 10)
 (defparameter +quarter-rest-thickness+ 2)
@@ -408,25 +410,74 @@
 
   (draw-note-heads chord note-y staff))
 
+(defun draw-beam (staff beam-bottom beam-top beam-x)
+  (cl-svg:draw (scene staff)
+      (:line :x1 beam-x :y1 beam-bottom
+             :x2 beam-x :y2 beam-top)
+      :stroke "black"
+      :stroke-width +beam-thickness+))
+
+(defmacro dochords ((chord-sym chords chord-y-sym note-y) &body body)
+  `(loop :for ,chord-sym :in ,chords
+         :with ,chord-y-sym := ,note-y
+         :do (progn ,@body)
+         :do (decf ,chord-y-sym (construct-height ,chord-sym))))
+
 (defmethod draw-construct ((beamed beamed) note-y staff)
   (dolist (chord (chords beamed))
     (assert (member (note chord) '(8 16))))
 
-  (let (last-chord-y)
-    (loop :for chord :in (chords beamed)
-          :for chord-y := note-y :then (- chord-y (construct-height chord))
-          :do (draw-untapered-stem chord chord-y staff)
-          :do (draw-note-heads chord chord-y staff)
-          :finally (setf last-chord-y chord-y))
+  (let ((chords (chords beamed))
+        last-chord-y)
+    (dochords (chord chords chord-y note-y)
+      (draw-untapered-stem chord chord-y staff)
+      (draw-note-heads chord chord-y staff)
+      (setf last-chord-y chord-y))
+
     ;; beam
     (let ((beam-x (stem-left staff))
           (beam-bottom (+ (stem-y note-y) (/ +note-thickness+ 2)))
           (beam-top (- (stem-y last-chord-y) (/ +note-thickness+ 2))))
-      (cl-svg:draw (scene staff)
-          (:line :x1 beam-x :y1 beam-bottom
-                 :x2 beam-x :y2 beam-top)
-          :stroke "black"
-          :stroke-width +beam-thickness+))))
+      (draw-beam staff beam-bottom beam-top beam-x))
+
+    ;; draw sixteenth note beams
+    (let (beam-start beam-end)
+      (dochords (chord chords chord-y note-y)
+        (when (and (null beam-start)
+                   (= (note chord) 16))
+          ;; record the start of the sixteenth note beam if it hasn't
+          ;; been started yet.
+          (setf beam-start
+                (if (eq chord (first chords))
+                    chord-y
+                    (+ chord-y (note-height (/ 32))))))
+
+        ;; update the end of the sixteenth beam
+        (when (and beam-start
+                   (= (note chord) 16))
+          (setf beam-end
+                (- chord-y (note-height (/ 32)))))
+
+        ;; draw the end of the sixteenth note beam.
+        (when (and beam-start
+                   (= (note chord) 8))
+          (draw-beam staff
+                     (stem-y beam-start)
+                     (stem-y beam-end)
+                     (+ +double-beam-offset+
+                        (stem-left staff)))
+          (setf beam-start nil))
+
+        ;; Finally, draw the sixteenth note beam if at the end of the
+        ;; loop
+        (when (and beam-start
+                   (= (note chord) 16)
+                   (eq chord (car (last chords))))
+          (draw-beam staff
+                     (stem-y beam-start)
+                     (stem-y chord-y)
+                     (+ +double-beam-offset+
+                        (stem-left staff))))))))
 
 (defun draw-bar (bar-num staff)
   "Draw the bar's starting line and its notes."
