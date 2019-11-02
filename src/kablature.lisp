@@ -19,7 +19,11 @@
           (print-kab kab output)
           (print-kab kab)))))
 
-(defun preview (&optional (pathname #P"examples/hot-cross-buns.lisp")
+;; This is mainly for quick-testing that features in the print module
+;; is being added correctly. It assumes a POSIX filesystem and that
+;; the program `xdg-open' is available.
+(defun preview (&optional (pathname (merge-pathnames #P"examples/hot-cross-buns.lisp"
+                                                     (asdf:system-source-directory :kablature)))
                        (out-path "/tmp/kablature.svg"))
   (with-open-file (outstream out-path :direction :output :if-exists :supersede)
     (rep-file-path pathname :output outstream)
