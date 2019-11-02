@@ -477,27 +477,13 @@
 
     (labels ((ratio (bars-per-staff)
                (/ (scene-width tab (staves-per-tab tab bars-per-staff))
-                  (scene-height tab bars-per-staff)))
-             (ratio-error (bars-per-staff)
-               (/ (abs (- (ratio bars-per-staff) +scene-target-ratio+))
-                  +scene-target-ratio+)))
-      (loop :with best-bars-per-staff := bar-length ; if something
-                                                    ; goes wrong and
-                                                    ; bars isn't set,
-                                                    ; default to one
-                                                    ; big stretch.
-            :with best-error := 9999 ; absurdly high percent error.
-            :for bars-per-staff :from 2 :to 12 :by 2 ; Even groupings
-                                                     ; to appeal to
-                                                     ; traditional
-                                                     ; western music
-            :for ratio-error := (ratio-error bars-per-staff)
-            :do (when (< ratio-error
-                         best-error)
-                  (setf best-bars-per-staff bars-per-staff)
-                  (setf best-error ratio-error))
-            :finally (return best-bars-per-staff)))
-    ))
+                  (scene-height tab bars-per-staff))))
+      (loop
+        ;; Even groupings to appeal to traditional western music
+        :for bars-per-staff :from 2 :by 2
+        ;; Err on the scene being taller than the target vs. wider.
+        :until (< (ratio bars-per-staff) +scene-target-ratio+)
+        :finally (return bars-per-staff)))))
 
 (defun print-kab (kab &optional (stream *standard-output*))
   (multiple-value-bind (scene staves) (make-scene-and-staves kab (ideal-bars-per-staff kab))
