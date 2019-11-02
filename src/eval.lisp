@@ -42,7 +42,10 @@
               ((> beats (beats-per-bar timesig))
                (error "Found ~S beats in bar ~S by construct ~S."
                       beats (length bars) construct)))
-        :finally (return (nreverse bars))))
+        :finally (if (zerop beats)
+                     (return (nreverse bars))
+                     (error "Found ~S beats in the final bar ~S by construct ~S."
+                            beats (length bars) construct))))
 
 (defun eval-kab (tab-sexp)
   (destructuring-bind (deftablature title proplist
