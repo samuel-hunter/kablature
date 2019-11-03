@@ -506,16 +506,24 @@
   (ceiling (length (bars tab)) bars-per-staff))
 
 (defun make-scene-and-staves (kab bars-per-staff)
-  (let* ((staves-per-tab (staves-per-tab kab bars-per-staff))
+  "Return the scene and a list of its staves as two values. If
+`BARS-PER-STAFF' is a non-positive integer, the scene will only make
+one staff."
+  (let* ((bars-per-staff* (if (> bars-per-staff 0)
+                              bars-per-staff
+                              (length (bars kab))))
+         (staves-per-tab (if (> bars-per-staff 0)
+                             (staves-per-tab kab bars-per-staff)
+                             1))
          (width (scene-width kab staves-per-tab))
-         (height (scene-height kab bars-per-staff))
+         (height (scene-height kab bars-per-staff*))
          (scene (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                           :width width
                                           :height height)))
     (cl-svg:draw scene (:rect :x 0 :y 0 :width width :height height)
                  :fill "white")
     (loop :for staff-num :upto (1- staves-per-tab)
-          :collect (make-staff kab scene staff-num bars-per-staff) :into staves
+          :collect (make-staff kab scene staff-num bars-per-staff*) :into staves
           :finally (return (values scene staves)))))
 
 (defun ideal-bars-per-staff (tab)
@@ -536,8 +544,10 @@
         :until (< (ratio bars-per-staff) +scene-target-ratio+)
         :finally (return bars-per-staff)))))
 
-(defun print-kab (kab &optional (stream *standard-output*))
-  (multiple-value-bind (scene staves) (make-scene-and-staves kab (ideal-bars-per-staff kab))
+(defun print-kab (kab &optional (stream *standard-output*) &key bars-per-staff)
+  (multiple-value-bind (scene staves) (make-scene-and-staves kab (or bars-per-staff
+                                                                     (bars-per-staff kab)
+                                                                     (ideal-bars-per-staff kab)))
     (loop :for staff :in staves
           :do (draw-staff staff)
           :do (loop :for bar-num :upto (1- (bar-length staff))

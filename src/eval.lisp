@@ -54,7 +54,8 @@
     (check-type title string)
 
     (let ((timesig (getf proplist :timesig (cons 4 4)))
-          (keys (getf proplist :keys 17)))
+          (keys (getf proplist :keys 17))
+          (bars-per-staff (getf proplist :bars-per-staff)))
       (check-type timesig (cons integer integer))
       (check-type keys integer)
 
@@ -66,6 +67,7 @@
                         :title title
                         :timesig timesig
                         :keys keys
+                        :bars-per-staff bars-per-staff
                         :bars
                         (group-constructs constructs
                                           timesig)))))))

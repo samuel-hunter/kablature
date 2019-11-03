@@ -12,7 +12,7 @@
            :tablature
            :title
            :timesig
-           :constructs
+           :bars-per-staff
            :bars
            :beats-per-bar
            :beat-root
@@ -53,6 +53,7 @@
   ((title :type string :reader title :initarg :title)
    (keys :type integer :reader keys :initarg :keys)
    (timesig :type (cons integer integer) :reader timesig :initarg :timesig)
+   (bars-per-staff :type (or integer null) :reader bars-per-staff :initarg :bars-per-staff)
    (bars :reader bars :initarg :bars)))
 
 (defun beats-per-bar (timesig)
