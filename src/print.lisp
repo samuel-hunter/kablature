@@ -425,7 +425,8 @@
 
 (defmethod draw-construct ((beamed beamed) note-y staff)
   (dolist (chord (chords beamed))
-    (assert (member (note chord) '(8 16))))
+    (assert (member (note chord) '(8 16)))
+    (assert (not (restp chord))))
 
   (let ((chords (chords beamed))
         last-chord-y)
