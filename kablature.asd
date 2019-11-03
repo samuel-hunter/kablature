@@ -5,7 +5,10 @@
   :author "Sam Hunter"
   :license  "BSD 3-Clause"
   :version "0.0.1"
-  :depends-on (#:cl-svg)
+  :depends-on (#:cl-svg #:unix-opts)
+  :build-operation "program-op"
+  :build-pathname "../kablature"
+  :entry-point "kablature:main"
   :serial t
   :pathname "src"
   :components ((:file "model")
