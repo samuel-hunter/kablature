@@ -13,23 +13,20 @@
 
 (in-package #:kablature)
 
-(defparameter +default-output+ "out.svg")
-
-(defun rep-file-path (pathname &key output bars-per-staff)
-  (with-open-file (stream pathname :direction :input)
-    (let ((kab (eval-kab (read-kab stream))))
-      (if output
-          (print-kab kab output :bars-per-staff bars-per-staff)
-          (print-kab kab :bars-per-staff bars-per-staff)))))
+(defun rep-file-path (&key (stream-in *standard-input*)
+                        (stream-out *standard-output*)
+                        bars-per-staff)
+  (print-kab (eval-kab (read-kab stream-in)) stream-out :bars-per-staff bars-per-staff))
 
 ;; This is mainly for quick-testing that features in the print module
 ;; is being added correctly. It assumes a POSIX filesystem and that
 ;; the program `xdg-open' is available.
 (defun preview (&optional (pathname (merge-pathnames #P"examples/hot-cross-buns.lisp"
                                                      (asdf:system-source-directory :kablature)))
-                       (out-path "/tmp/kablature.svg"))
-  (with-open-file (outstream out-path :direction :output :if-exists :supersede)
-    (rep-file-path pathname :output outstream))
+                  (out-path "/tmp/kablature.svg"))
+  (with-open-file (stream-in pathname :direction :input)
+    (with-open-file (stream-out out-path :direction :output :if-exists :supersede)
+      (rep-file-path :stream-in stream-in :stream-out stream-out)))
   (sb-ext:run-program "/usr/bin/xdg-open" (list out-path)))
 
 (defun unknown-option (condition)
@@ -41,11 +38,21 @@
      (when ,result
        ,@body)))
 
-(defun show-help ()
+(defmacro with-open-file-when ((stream filespec default-stream &rest options) &body body)
+  `(if ,filespec
+       (with-open-file (,stream ,filespec ,@options)
+         ,@body)
+       (let ((,stream ,default-stream))
+         ,@body)))
+
+(defun show-help (&optional error-code)
   (opts:describe
    :prefix "Convert a tablature file into a visual SVG."
+   :suffix "If FILE is not provided, kablature reads from standard input."
    :usage-of (first (opts:argv))
-   :args "FILE"))
+   :args "FILE")
+  (when error-code
+    (opts:exit error-code)))
 
 (defun main ()
   (opts:define-opts
@@ -54,10 +61,10 @@
      :short #\h
      :long "help")
     (:name :output
-     :description (format nil "Place output into OUTPUT (default ~A)" +default-output+)
+     :description "Place output into OUTPUT (default standard output)"
      :short #\o
      :long "output"
-     :arg-parser (lambda (x) (make-pathname :name x))
+     :arg-parser #'identity
      :meta-var "OUTPUT")
     (:name :bars
      :description "Force the tablature output to a specific number of bars per staff."
@@ -73,27 +80,28 @@
         (opts:missing-arg (condition)
           (format *error-output* "fatal: option ~s needs an argument!~%"
                   (opts:option condition))
-          (opts:exit 1))
+          (show-help 1))
         (opts:arg-parser-failed (condition)
           (format *error-output* "fatal: cannot parse ~s as argument of ~s~%"
                   (opts:raw-arg condition)
                   (opts:option condition))
-          (opts:exit 1))
+          (show-help 1))
         (opts:missing-required-option (con)
           (format *error-output* "fatal: ~a~%" con)
-          (opts:exit 1)))
+          (show-help 1)))
+
     (when-option (options :help)
       (show-help)
       (return-from main))
-    (let ((out-path +default-output+)
-          in-path)
-      (when-option (options :output it)
-        (setf out-path it))
-      (unless (= (length free-args) 1)
-        (format *error-output* "fatal: expected 1 free argument.~%")
-        (show-help)
-        (opts:exit 1))
-      (setf in-path (make-pathname :name (first free-args)))
-      (with-open-file (outstream out-path :direction :output :if-exists :supersede)
-        (rep-file-path in-path :output outstream
-                               :bars-per-staff (getf options :bars))))))
+
+    (when (> (length free-args) 1)
+        (format *error-output* "fatal: too many arguments.~%")
+        (show-help 1))
+
+    (with-open-file-when (stream-out (getf options :output) *standard-output*
+                                     :direction :output :if-exists :supersede)
+      (with-open-file-when (stream-in (first free-args) *standard-input*
+                                      :direction :input)
+        (rep-file-path :stream-in stream-in
+                       :stream-out stream-out
+                       :bars-per-staff (getf options :bars))))))
