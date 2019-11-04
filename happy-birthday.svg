@@ -1,0 +1,406 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="727.50" width="965" version="1.1" id="toplevel"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect x="0" y="0" width="965" height="727.50" fill="white"/>
+  <rect x="170" y="10" width="15" height="692.50" fill="salmon" stroke="black"/>
+  <text x="177.50" y="717.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="155" y="10" width="15" height="687.50" fill="white" stroke="black"/>
+  <text x="162.50" y="712.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="185" y="10" width="15" height="687.50" fill="white" stroke="black"/>
+  <text x="192.50" y="712.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="140" y="10" width="15" height="682.50" fill="white" stroke="black"/>
+  <text x="147.50" y="707.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="200" y="10" width="15" height="682.50" fill="white" stroke="black"/>
+  <text x="207.50" y="707.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="125" y="10" width="15" height="677.50" fill="salmon" stroke="black"/>
+  <text x="132.50" y="702.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="215" y="10" width="15" height="677.50" fill="salmon" stroke="black"/>
+  <text x="222.50" y="702.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="110" y="10" width="15" height="672.50" fill="white" stroke="black"/>
+  <text x="117.50" y="697.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="230" y="10" width="15" height="672.50" fill="white" stroke="black"/>
+  <text x="237.50" y="697.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="95" y="10" width="15" height="667.50" fill="white" stroke="black"/>
+  <text x="102.50" y="692.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="245" y="10" width="15" height="667.50" fill="white" stroke="black"/>
+  <text x="252.50" y="692.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="80" y="10" width="15" height="662.50" fill="salmon" stroke="black"/>
+  <text x="87.50" y="687.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="260" y="10" width="15" height="662.50" fill="salmon" stroke="black"/>
+  <text x="267.50" y="687.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="65" y="10" width="15" height="657.50" fill="white" stroke="black"/>
+  <text x="72.50" y="682.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="275" y="10" width="15" height="657.50" fill="white" stroke="black"/>
+  <text x="282.50" y="682.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="50" y="10" width="15" height="652.50" fill="white" stroke="black"/>
+  <text x="57.50" y="677.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="290" y="10" width="15" height="652.50" fill="white" stroke="black"/>
+  <text x="297.50" y="677.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <line x1="170" y1="10" x2="170" y2="702.50" stroke="black" stroke-width="3"/>
+  <line x1="50" x2="305" y1="662.50" y2="662.50" stroke-width="3" stroke="black"/>
+  <text x="310" y="662.50" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    1
+  </text>
+  <rect x="132.50" y="640" width="7.50" height="10"/>
+  <rect x="207.50" y="640" width="7.50" height="10"/>
+  <polyline points="177.50,546.00 30.00,546.00 35.00,541.00" stroke="black"
+            stroke-width="1" fill="none"/>
+  <circle cx="177.50" cy="550" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <circle cx="183.50" cy="544" r="2" fill="black"/>
+  <polyline points="177.50,512.25 30.00,512.25 35.00,507.25" stroke="black"
+            stroke-width="1" fill="none"/>
+  <line x1="35" y1="512.25" x2="40" y2="507.25" stroke="black" stroke-width="1"/>
+  <circle cx="177.50" cy="516.25" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="50" x2="305" y1="505" y2="505" stroke-width="3" stroke="black"/>
+  <text x="310" y="505" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    2
+  </text>
+  <line x1="30" y1="478.50" x2="162.50" y2="478.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="162.50" cy="482.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="30" y1="433.50" x2="177.50" y2="433.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="177.50" cy="437.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="30" y1="388.50" x2="147.50" y2="388.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="147.50" cy="392.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="50" x2="305" y1="347.50" y2="347.50" stroke-width="3" stroke="black"/>
+  <text x="310" y="347.50" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    3
+  </text>
+  <line x1="30" y1="321" x2="192.50" y2="321" stroke="black" stroke-width="1"/>
+  <circle cx="192.50" cy="325" r="4" fill="none" stroke="black" stroke-width="1"/>
+  <polyline points="177.50,231.00 30.00,231.00 35.00,226.00" stroke="black"
+            stroke-width="1" fill="none"/>
+  <circle cx="177.50" cy="235" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <circle cx="183.50" cy="229" r="2" fill="black"/>
+  <polyline points="177.50,197.25 30.00,197.25 35.00,192.25" stroke="black"
+            stroke-width="1" fill="none"/>
+  <line x1="35" y1="197.25" x2="40" y2="192.25" stroke="black" stroke-width="1"/>
+  <circle cx="177.50" cy="201.25" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="50" x2="305" y1="190" y2="190" stroke-width="3" stroke="black"/>
+  <text x="310" y="190" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    4
+  </text>
+  <line x1="30" y1="163.50" x2="162.50" y2="163.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="162.50" cy="167.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="30" y1="118.50" x2="177.50" y2="118.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="177.50" cy="122.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="30" y1="73.50" x2="207.50" y2="73.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="207.50" cy="77.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <rect x="475" y="10" width="15" height="692.50" fill="salmon" stroke="black"/>
+  <text x="482.50" y="717.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="460" y="10" width="15" height="687.50" fill="white" stroke="black"/>
+  <text x="467.50" y="712.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="490" y="10" width="15" height="687.50" fill="white" stroke="black"/>
+  <text x="497.50" y="712.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="445" y="10" width="15" height="682.50" fill="white" stroke="black"/>
+  <text x="452.50" y="707.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="505" y="10" width="15" height="682.50" fill="white" stroke="black"/>
+  <text x="512.50" y="707.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="430" y="10" width="15" height="677.50" fill="salmon" stroke="black"/>
+  <text x="437.50" y="702.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="520" y="10" width="15" height="677.50" fill="salmon" stroke="black"/>
+  <text x="527.50" y="702.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="415" y="10" width="15" height="672.50" fill="white" stroke="black"/>
+  <text x="422.50" y="697.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="535" y="10" width="15" height="672.50" fill="white" stroke="black"/>
+  <text x="542.50" y="697.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="400" y="10" width="15" height="667.50" fill="white" stroke="black"/>
+  <text x="407.50" y="692.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="550" y="10" width="15" height="667.50" fill="white" stroke="black"/>
+  <text x="557.50" y="692.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="385" y="10" width="15" height="662.50" fill="salmon" stroke="black"/>
+  <text x="392.50" y="687.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="565" y="10" width="15" height="662.50" fill="salmon" stroke="black"/>
+  <text x="572.50" y="687.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="370" y="10" width="15" height="657.50" fill="white" stroke="black"/>
+  <text x="377.50" y="682.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="580" y="10" width="15" height="657.50" fill="white" stroke="black"/>
+  <text x="587.50" y="682.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="355" y="10" width="15" height="652.50" fill="white" stroke="black"/>
+  <text x="362.50" y="677.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="595" y="10" width="15" height="652.50" fill="white" stroke="black"/>
+  <text x="602.50" y="677.50"
+       style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <line x1="475" y1="10" x2="475" y2="702.50" stroke="black" stroke-width="3"/>
+  <line x1="355" x2="610" y1="662.50" y2="662.50" stroke-width="3"
+        stroke="black"/>
+  <text x="615" y="662.50" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    5
+  </text>
+  <line x1="335" y1="636" x2="452.50" y2="636" stroke="black" stroke-width="1"/>
+  <circle cx="452.50" cy="640" r="4" fill="none" stroke="black" stroke-width="1"/>
+  <polyline points="482.50,546.00 335.00,546.00 340.00,541.00" stroke="black"
+            stroke-width="1" fill="none"/>
+  <circle cx="482.50" cy="550" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <circle cx="488.50" cy="544" r="2" fill="black"/>
+  <polyline points="482.50,512.25 335.00,512.25 340.00,507.25" stroke="black"
+            stroke-width="1" fill="none"/>
+  <line x1="340" y1="512.25" x2="345" y2="507.25" stroke="black"
+        stroke-width="1"/>
+  <circle cx="482.50" cy="516.25" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="355" x2="610" y1="505" y2="505" stroke-width="3" stroke="black"/>
+  <text x="615" y="505" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    6
+  </text>
+  <line x1="335" y1="478.50" x2="422.50" y2="478.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="422.50" cy="482.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="335" y1="433.50" x2="437.50" y2="433.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="437.50" cy="437.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="335" y1="388.50" x2="452.50" y2="388.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="452.50" cy="392.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="355" x2="610" y1="347.50" y2="347.50" stroke-width="3"
+        stroke="black"/>
+  <text x="615" y="347.50" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    7
+  </text>
+  <line x1="335" y1="321" x2="497.50" y2="321" stroke="black" stroke-width="1"/>
+  <circle cx="497.50" cy="325" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="335" y1="276" x2="467.50" y2="276" stroke="black" stroke-width="1"/>
+  <circle cx="467.50" cy="280" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <polyline points="527.50,231.00 335.00,231.00 340.00,226.00" stroke="black"
+            stroke-width="1" fill="none"/>
+  <circle cx="527.50" cy="235" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <circle cx="533.50" cy="229" r="2" fill="black"/>
+  <polyline points="527.50,197.25 335.00,197.25 340.00,192.25" stroke="black"
+            stroke-width="1" fill="none"/>
+  <line x1="340" y1="197.25" x2="345" y2="192.25" stroke="black"
+        stroke-width="1"/>
+  <circle cx="527.50" cy="201.25" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="355" x2="610" y1="190" y2="190" stroke-width="3" stroke="black"/>
+  <text x="615" y="190" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    8
+  </text>
+  <line x1="335" y1="163.50" x2="437.50" y2="163.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="437.50" cy="167.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="335" y1="118.50" x2="452.50" y2="118.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="452.50" cy="122.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <line x1="335" y1="73.50" x2="512.50" y2="73.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="512.50" cy="77.50" r="4" fill="black" stroke="black"
+          stroke-width="1"/>
+  <rect x="780" y="10" width="15" height="220" fill="salmon" stroke="black"/>
+  <text x="787.50" y="245" style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="765" y="10" width="15" height="215" fill="white" stroke="black"/>
+  <text x="772.50" y="240" style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="795" y="10" width="15" height="215" fill="white" stroke="black"/>
+  <text x="802.50" y="240" style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="750" y="10" width="15" height="210" fill="white" stroke="black"/>
+  <text x="757.50" y="235" style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="810" y="10" width="15" height="210" fill="white" stroke="black"/>
+  <text x="817.50" y="235" style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="735" y="10" width="15" height="205" fill="salmon" stroke="black"/>
+  <text x="742.50" y="230" style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="825" y="10" width="15" height="205" fill="salmon" stroke="black"/>
+  <text x="832.50" y="230" style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="720" y="10" width="15" height="200" fill="white" stroke="black"/>
+  <text x="727.50" y="225" style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="840" y="10" width="15" height="200" fill="white" stroke="black"/>
+  <text x="847.50" y="225" style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="705" y="10" width="15" height="195" fill="white" stroke="black"/>
+  <text x="712.50" y="220" style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <rect x="855" y="10" width="15" height="195" fill="white" stroke="black"/>
+  <text x="862.50" y="220" style="+font-size+:15;fill:black;text-anchor:middle">
+    F
+  </text>
+  <rect x="690" y="10" width="15" height="190" fill="salmon" stroke="black"/>
+  <text x="697.50" y="215" style="+font-size+:15;fill:black;text-anchor:middle">
+    G
+  </text>
+  <rect x="870" y="10" width="15" height="190" fill="salmon" stroke="black"/>
+  <text x="877.50" y="215" style="+font-size+:15;fill:black;text-anchor:middle">
+    A
+  </text>
+  <rect x="675" y="10" width="15" height="185" fill="white" stroke="black"/>
+  <text x="682.50" y="210" style="+font-size+:15;fill:black;text-anchor:middle">
+    B
+  </text>
+  <rect x="885" y="10" width="15" height="185" fill="white" stroke="black"/>
+  <text x="892.50" y="210" style="+font-size+:15;fill:black;text-anchor:middle">
+    C
+  </text>
+  <rect x="660" y="10" width="15" height="180" fill="white" stroke="black"/>
+  <text x="667.50" y="205" style="+font-size+:15;fill:black;text-anchor:middle">
+    D
+  </text>
+  <rect x="900" y="10" width="15" height="180" fill="white" stroke="black"/>
+  <text x="907.50" y="205" style="+font-size+:15;fill:black;text-anchor:middle">
+    E
+  </text>
+  <line x1="780" y1="10" x2="780" y2="230" stroke="black" stroke-width="3"/>
+  <line x1="660" y1="10" x2="915" y2="10" stroke-width="3" stroke="black"/>
+  <line x1="660" y1="20" x2="915" y2="20" stroke="black"/>
+  <line x1="660" x2="915" y1="190" y2="190" stroke-width="3" stroke="black"/>
+  <text x="920" y="190" style="+font-size+:15;fill:black"
+       dominant-baseline="middle">
+    9
+  </text>
+  <line x1="640" y1="163.50" x2="757.50" y2="163.50" stroke="black"
+        stroke-width="1"/>
+  <circle cx="757.50" cy="167.50" r="4" fill="none" stroke="black"
+          stroke-width="1"/>
+  <polyline points="780.00,77.50 787.50,73.50 795.00,77.50 800.00,73.50 805.00,77.50 810.00,75.50"
+            stroke="black" stroke-width="2" fill="none"/>
+</svg>
