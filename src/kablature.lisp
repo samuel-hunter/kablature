@@ -13,10 +13,10 @@
 
 (in-package #:kablature)
 
-(defun rep-file-path (&key (stream-in *standard-input*)
-                        (stream-out *standard-output*)
-                        bars-per-staff)
-  (print-kab (eval-kab (read-kab stream-in)) stream-out :bars-per-staff bars-per-staff))
+(defun rep-file-path (stream-in stream-out &optional bars-per-staff)
+  (print-kab (eval-kab (read-kab stream-in))
+             stream-out
+             :bars-per-staff bars-per-staff))
 
 ;; This is mainly for quick-testing that features in the print module
 ;; is being added correctly. It assumes a POSIX filesystem and that
@@ -26,7 +26,7 @@
                   (out-path "/tmp/kablature.svg"))
   (with-open-file (stream-in pathname :direction :input)
     (with-open-file (stream-out out-path :direction :output :if-exists :supersede)
-      (rep-file-path :stream-in stream-in :stream-out stream-out)))
+      (rep-file-path stream-in stream-out)))
   (sb-ext:run-program "/usr/bin/xdg-open" (list out-path)))
 
 (defun unknown-option (condition)
@@ -53,6 +53,13 @@
    :args "FILE")
   (when error-code
     (opts:exit error-code)))
+
+(defmacro show-error-and-die (control-string &rest format-arguments)
+  `(progn
+     (format *error-output* ,(concatenate 'string "~A: " control-string "~%")
+             (first (opts:argv))
+             ,@format-arguments)
+     (opts:exit 1)))
 
 (defun main ()
   (opts:define-opts
@@ -98,10 +105,11 @@
         (format *error-output* "fatal: too many arguments.~%")
         (show-help 1))
 
-    (with-open-file-when (stream-out (getf options :output) *standard-output*
-                                     :direction :output :if-exists :supersede)
-      (with-open-file-when (stream-in (first free-args) *standard-input*
-                                      :direction :input)
-        (rep-file-path :stream-in stream-in
-                       :stream-out stream-out
-                       :bars-per-staff (getf options :bars))))))
+    (handler-case
+        (with-open-file-when (stream-out (getf options :output) *standard-output*
+                                         :direction :output :if-exists :supersede)
+          (with-open-file-when (stream-in (first free-args) *standard-input*
+                                          :direction :input)
+            (rep-file-path stream-in stream-out (getf options :bars))))
+      (error (err)
+        (show-error-and-die "fatal: ~A." err)))))
