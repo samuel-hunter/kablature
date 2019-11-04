@@ -1,5 +1,7 @@
 LISP ?= sbcl
 
+PREFIX ?= /usr/local
+
 SOURCES=$(wildcard src/*.lisp)
 EXAMPLE_SOURCES=$(wildcard examples/*.lisp)
 EXAMPLE_TARGETS=$(patsubst examples/%.lisp,examples/%.svg,$(EXAMPLE_SOURCES))
@@ -22,3 +24,6 @@ examples/%.svg: examples/%.lisp kablature
 clean:
 	$(RM) kablature
 	$(RM) $(EXAMPLE_TARGETS)
+
+install:
+	install -t $(PREFIX)/bin kablature
