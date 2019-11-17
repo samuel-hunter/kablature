@@ -9,6 +9,8 @@
   (:export :read-kab
            :eval-kab
            :print-kab
+           :rep-file-path
+           :convert
            :main))
 
 (in-package #:kablature)
@@ -17,6 +19,11 @@
   (print-kab (eval-kab (read-kab stream-in))
              stream-out
              :bars-per-staff bars-per-staff))
+
+(defun convert (filepath-in filepath-out &optional bars-per-staff)
+  (with-open-file (stream-in filepath-in :direction :input)
+    (with-open-file (stream-out filepath-out :direction :output :if-exists :supersede)
+      (rep-file-path stream-in stream-out bars-per-staff))))
 
 ;; This is mainly for quick-testing that features in the print module
 ;; is being added correctly. It assumes a POSIX filesystem and that

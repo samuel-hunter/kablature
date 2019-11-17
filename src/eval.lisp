@@ -34,18 +34,28 @@
         :for construct :in constructs
         :do (incf beats (beat-length construct (beat-root timesig)))
         :do (push construct bar-constructs)
-        :do (cond
-              ((= beats (beats-per-bar timesig))
-               (push (nreverse bar-constructs) bars)
-               (setf bar-constructs ())
-               (setf beats 0))
-              ((> beats (beats-per-bar timesig))
-               (error "Found ~S beats in bar ~S by construct ~S."
-                      beats (length bars) construct)))
-        :finally (if (zerop beats)
-                     (return (nreverse bars))
-                     (error "Found ~S beats in the final bar ~S by construct ~S."
-                            beats (length bars) construct))))
+        :do (restart-case (cond
+                            ((= beats (beats-per-bar timesig))
+                             (push (nreverse bar-constructs) bars)
+                             (setf bar-constructs ())
+                             (setf beats 0))
+                            ((> beats (beats-per-bar timesig))
+                             (error "Found ~S beats in bar ~S by construct ~S."
+                                    beats (length bars) construct)))
+              (skip-rest ()
+                :report (lambda (stream)
+                          (format stream "Skip grouping the rest of the constructs."))
+                (return (nreverse bars))))
+
+        :finally (restart-case
+                     (if (zerop beats)
+                         (return (nreverse bars))
+                         (error "Found ~S beats in the final bar ~S by construct ~S."
+                                beats (length bars) construct))
+                   (skip-rest ()
+                     :report (lambda (stream)
+                               (format stream "Skip the last unfinished bar."))
+                     (return (nreverse bars))))))
 
 (defun eval-kab (tab-sexp)
   (destructuring-bind (deftablature title proplist
@@ -55,9 +65,12 @@
 
     (let ((timesig (getf proplist :timesig (cons 4 4)))
           (keys (getf proplist :keys 17))
-          (bars-per-staff (getf proplist :bars-per-staff)))
+          (bars-per-staff (getf proplist :bars-per-staff))
+          (repeats (getf proplist :repeats)))
       (check-type timesig (cons integer integer))
       (check-type keys integer)
+      (check-type bars-per-staff (or integer null))
+      (check-type repeats list)
 
       (loop :for sexp :in construct-sexps
             :collect (make-construct sexp) :into constructs
@@ -68,6 +81,7 @@
                         :timesig timesig
                         :keys keys
                         :bars-per-staff bars-per-staff
+                        :repeats repeats
                         :bars
                         (group-constructs constructs
                                           timesig)))))))

@@ -13,6 +13,9 @@
            :title
            :timesig
            :bars-per-staff
+           :repeats
+           :repeat-starts
+           :repeat-ends
            :bars
            :beats-per-bar
            :beat-root
@@ -54,7 +57,17 @@
    (keys :type integer :reader keys :initarg :keys)
    (timesig :type (cons integer integer) :reader timesig :initarg :timesig)
    (bars-per-staff :type (or integer null) :reader bars-per-staff :initarg :bars-per-staff)
+   (repeats :reader repeats :initarg :repeats
+            :documentation "Pairs of numbers determining the beginning and end of repeats.")
    (bars :reader bars :initarg :bars)))
+
+(defun repeat-starts (tablature)
+  (loop :for (starts ends) :on (repeats tablature)
+        :by #'cddr :collect starts))
+
+(defun repeat-ends (tablature)
+  (loop :for (starts ends) :on (repeats tablature)
+        :by #'cddr :collect ends))
 
 (defun beats-per-bar (timesig)
   (car timesig))

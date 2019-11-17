@@ -44,6 +44,8 @@
 (defparameter +text-style+
   (format nil "+font-size+:~A;fill:black" +font-size+))
 (defparameter +bar-color+ "black")
+(defparameter +repeat-color+ "blue"
+  "The color to mark a repeat sign and an an opening repeat sign's bar line")
 
 (defparameter +scene-height-min+ 800
   "The minimum height a singley-tabbed scene must be before being automatically split.")
@@ -234,6 +236,9 @@
   "Return the y position of the bottom of the given bar."
   (- (staff-body-bottom staff)
      (* bar-num (bar-height (timesig staff)))))
+
+(defun bar-top (bar-num staff)
+  (bar-bottom (1+ bar-num) staff))
 
 (defun stem-left (staff)
   (- (staff-left staff) +stem-outreach+))
@@ -483,19 +488,48 @@
 (defun draw-bar (bar-num staff)
   "Draw the bar's starting line and its notes."
   (let ((bar-bottom (bar-bottom bar-num staff))
+        (bar-top (bar-top bar-num staff ))
         (scene (scene staff))
+        (tab (tab staff))
         (staff-left (staff-left staff))
-        (staff-right (staff-right staff)))
+        (staff-right (staff-right staff))
+        (absolute-bar-num (+ 1 bar-num (bar-offset staff))))
 
     ;; bar line
     (cl-svg:draw scene (:line :x1 staff-left :x2 staff-right
                               :y1 bar-bottom :y2 bar-bottom)
                  :stroke-width +bar-line-thickness+
-                 :stroke +bar-color+)
+                 :stroke (if (member absolute-bar-num (repeat-starts tab))
+                             +repeat-color+
+                             +bar-color+))
+
+    (when (member absolute-bar-num (repeat-starts tab))
+      (cl-svg:draw scene (:circle :cx (key-center-x 4 staff)
+                                  :cy (- bar-bottom
+                                         (* 2 +bar-line-thickness+))
+                                  :r +bar-line-thickness+)
+                   :fill +repeat-color+)
+      (cl-svg:draw scene (:circle :cx (key-center-x 3 staff)
+                                  :cy (- bar-bottom
+                                         (* 2 +bar-line-thickness+))
+                                  :r +bar-line-thickness+)
+                   :fill +repeat-color+))
+
+    (when (member absolute-bar-num (repeat-ends tab))
+      (cl-svg:draw scene (:circle :cx (key-center-x 4 staff)
+                                  :cy (+ bar-top
+                                         (* 2 +bar-line-thickness+))
+                                  :r +bar-line-thickness+)
+                   :fill +repeat-color+)
+      (cl-svg:draw scene (:circle :cx (key-center-x 3 staff)
+                                  :cy (+ bar-top
+                                         (* 2 +bar-line-thickness+))
+                                  :r +bar-line-thickness+)
+                   :fill +repeat-color+))
     ;; bar label
     (cl-svg:text scene (:x (+ +bar-label-margin+ staff-right) :y bar-bottom
                         :style +text-style+ :dominant-baseline "middle")
-      (write-to-string (+ 1 bar-num (bar-offset staff))))
+      (write-to-string absolute-bar-num))
 
     ;; bar constructs
     (loop :for construct :in (nth bar-num (bars staff))
