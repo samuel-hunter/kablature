@@ -68,15 +68,23 @@ planned to be printed at the top of the file).
 The second argument is a property list of the following optional
 values:
 
-    - `:timesig (beats-per-bar . beat-root)` - A time signature of 4/4
-    and 3/4 would look like `:timesig (4 . 4)` and `:timesig (3 . 4)`,
-    respectively. The default is a 4/4 time signature.
-    - `:keys KEYS`. The number of keys that the kalimba tablature will
-    have. The default is 17, the number of keys on my own kalimba.
-    - `:bars-per-staff`. The program will automatically split the
-    tablature into multiple staves as best as they can, but you can
-    force it to a specific number of beats per staff. Any non-postive
-    integer will force the tablature into a single staff.
+- `:timesig (beats-per-bar . beat-root)` - A time signature of 4/4 and
+  3/4 would look like `:timesig (4 . 4)` and `:timesig (3 . 4)`,
+  respectively. The default is a 4/4 time signature.
+- `:keys KEYS`. The number of keys that the kalimba tablature will
+  have. The default is 17, the number of keys on my own kalimba.
+- `:bars-per-staff`. The program will automatically split the
+  tablature into multiple staves as best as they can, but you can
+  force it to a specific number of beats per staff. Any non-postive
+  integer will force the tablature into a single staff.
+- `:repeats (BEGIN END ...)` - Accepts pairs of bar numbers
+  (e.g. `:repeats (1 2 3 4)`) that marks the interval between
+  beginning and end repeat marks.
+- `:accidentals STRING` - Accepts a seven-char string positionally
+  symbolic to `"ABCDEFG"` containing `-`, `b`, and `#`. `-` describes
+  a natural, `b` represents a flat, and `#` represents a
+  sharp. `"-----#-"` represents a G major with an F#, whereas
+  `"bb--b--"` represents a C minor with A, B, and E flats.
     
 Within the body of the expression, there are two types of structures:
 chords and beamed groups.
