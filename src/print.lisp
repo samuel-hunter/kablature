@@ -403,7 +403,7 @@
         :do (cl-svg:draw scene (:circle :cx (key-center-x key staff)
                                         :cy note-y
                                         :r +note-radius+)
-                         :fill (if hollow-head "none" "black")
+                         :fill (if hollow-head "white" "black")
                          :stroke "black"
                          :stroke-width +note-thickness+)
         :when (dottedp chord)
