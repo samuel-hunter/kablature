@@ -168,6 +168,24 @@
   "Return the pitch letter associated with the key."
   (char +octave-notes+ (mod (+ key +octave-root+ -1) (length +octave-notes+))))
 
+(defun key-accidental (pitch tab)
+  (char (accidentals tab)
+        (- (char-code pitch) (char-code #\A))))
+
+(defun key-string (key staff)
+  "Return the string version of the key pitch being played"
+  (let* ((pitch (key-pitch key))
+         (accidental (key-accidental pitch (tab staff))))
+    (concatenate 'string
+                 (string pitch)
+                 (ecase accidental
+                   ;; Workaround: Some SVG implementations don't
+                   ;; render the proper musical Flat and Sharp signs,
+                   ;; so I'm using the ASCII pound and sharp sign.
+                   (#\- "") ; Natural
+                   (#\b "b") ; flat
+                   (#\# "#"))))) ; sharp
+
 (defun key-left (key staff)
   "Return the x position of the left portion of the key."
   (+ (staff-left staff) (* +space-width+ (key-position key staff))))
@@ -220,7 +238,7 @@
         :do  (cl-svg:text scene (:x (+ x (/ +space-width+ 2))
                                  :y (+ body-bottom offset-height +font-size+)
                                  :style +note-text-style+)
-               (string (key-pitch key))))
+               (key-string key staff)))
 
   ;; Draw thick line down middle of staff
   (cl-svg:draw (scene staff)

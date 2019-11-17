@@ -16,6 +16,7 @@
            :repeats
            :repeat-starts
            :repeat-ends
+           :accidentals
            :bars
            :beats-per-bar
            :beat-root
@@ -59,6 +60,7 @@
    (bars-per-staff :type (or integer null) :reader bars-per-staff :initarg :bars-per-staff)
    (repeats :reader repeats :initarg :repeats
             :documentation "Pairs of numbers determining the beginning and end of repeats.")
+   (accidentals :reader accidentals :initarg :accidentals)
    (bars :reader bars :initarg :bars)))
 
 (defun repeat-starts (tablature)

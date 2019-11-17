@@ -66,11 +66,13 @@
     (let ((timesig (getf proplist :timesig (cons 4 4)))
           (keys (getf proplist :keys 17))
           (bars-per-staff (getf proplist :bars-per-staff))
-          (repeats (getf proplist :repeats)))
+          (repeats (getf proplist :repeats))
+          (accidentals (getf proplist :accidentals)))
       (check-type timesig (cons integer integer))
       (check-type keys integer)
       (check-type bars-per-staff (or integer null))
       (check-type repeats list)
+      (check-type accidentals (or string null))
 
       (loop :for sexp :in construct-sexps
             :collect (make-construct sexp) :into constructs
@@ -82,6 +84,7 @@
                         :keys keys
                         :bars-per-staff bars-per-staff
                         :repeats repeats
+                        :accidentals (or accidentals "-------")
                         :bars
                         (group-constructs constructs
                                           timesig)))))))
