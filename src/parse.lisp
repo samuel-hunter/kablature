@@ -1,8 +1,8 @@
-(defpackage #:kablature.eval
+(defpackage #:kablature.parse
   (:use #:cl #:kablature.model)
   (:export :eval-kab))
 
-(in-package #:kablature.eval)
+(in-package #:kablature.parse)
 
 (defun make-chord (note-sexp)
   (destructuring-bind (note dottedp &rest keys) note-sexp

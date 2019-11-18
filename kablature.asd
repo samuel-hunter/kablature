@@ -13,6 +13,6 @@
   :pathname "src"
   :components ((:file "model")
                (:file "read")
-               (:file "eval")
+               (:file "parse")
                (:file "print")
                (:file "kablature")))

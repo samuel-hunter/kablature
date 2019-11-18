@@ -2,7 +2,7 @@
   (:use #:cl)
   (:import-from :kablature.read
                 :read-kab)
-  (:import-from :kablature.eval
+  (:import-from :kablature.parse
                 :eval-kab)
   (:import-from :kablature.print
                 :print-kab)
