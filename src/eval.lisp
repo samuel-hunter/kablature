@@ -22,7 +22,7 @@
   (let ((first-elem (first sexp)))
     (cond
       ((typep first-elem 'integer) (make-chord sexp))
-      ((string-equal "BEAMED" (symbol-name first-elem)) (make-beamed sexp))
+      ((eq first-elem :beamed) (make-beamed sexp))
       (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
 
 (defun group-constructs (constructs timesig)
@@ -60,7 +60,7 @@
 (defun eval-kab (tab-sexp)
   (destructuring-bind (deftablature title proplist
                        &body construct-sexps) tab-sexp
-    (assert (string-equal (symbol-name deftablature) "DEFTABLATURE"))
+    (assert (eq deftablature :deftablature))
     (check-type title string)
 
     (let ((timesig (getf proplist :timesig (cons 4 4)))

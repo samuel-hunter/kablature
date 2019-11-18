@@ -48,7 +48,7 @@ If FILE is not provided, kablature reads from standard input.
 A tablature file is a symbolic expression, like Lisp:
 
 ```lisp
-(deftablature "Happy Birthday" (:timesig (3 . 4) :keys 17)
+(:deftablature "Happy Birthday" (:timesig (3 . 4) :keys 17)
   (2 nil) (8 t 1) (16 nil 1)
 
   (4 nil 2) (4 nil 1) (4 nil 4)
@@ -101,15 +101,14 @@ key on the kalimba. `(8 t 1 3 5)` describes a dotted eighth note that
 plays keys 1, 3, and 5 together. `(2 nil)` describes a half note that
 plays no keys -- implicitly, a rest.
 
-Beamed groups follow the syntax `(beamed ....)`, where `beamed` is the
-literal symbol `beamed`. Chords can only be non-rest eighth and
-sixteenth notes, and describes that the notes are grouped together by
-a beam instead of lonely flags for each note.
+Beamed groups follow the syntax `(:beamed ....)`. Chords can only be
+non-rest eighth and sixteenth notes, and describes that the notes are
+grouped together by a beam instead of lonely flags for each note.
 
 For example, while `(8 nil 1) (8 nil 3)` describes two lonely eighth
-notes and draws the flags for each indivdual chord, `(beamed (8 nil 1)
-(8 nil 3))` describes the same two chords grouped together by a single
-beam.
+notes and draws the flags for each indivdual chord, `(:beamed (8 nil
+1) (8 nil 3))` describes the same two chords grouped together by a
+single beam.
 
 ## License
 

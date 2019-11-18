@@ -1,4 +1,4 @@
-(deftablature "Happy Birthday" (:timesig (3 . 4) :keys 17)
+(:deftablature "Happy Birthday" (:timesig (3 . 4) :keys 17)
   (2 nil) (8 t 1) (16 nil 1)
 
   (4 nil 2) (4 nil 1) (4 nil 4)
