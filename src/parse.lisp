@@ -1,90 +1,45 @@
 (defpackage #:kablature.parse
   (:use #:cl #:kablature.model)
+  (:import-from #:alexandria
+                :destructuring-case)
   (:export :eval-kab))
 
 (in-package #:kablature.parse)
 
-(defun make-chord (note-sexp)
-  (destructuring-bind (note dottedp &rest keys) note-sexp
-    (check-type note integer)
-    (check-type dottedp boolean)
-    (loop :for key :in keys :do (check-type key integer))
-    (make-instance 'chord :note note :dottedp dottedp :keys keys)))
+(defun parse-chord (s-expression)
+  (destructuring-bind (note dottedp &rest keys) s-expression
+    (make-chord note dottedp keys)))
 
-(defun make-beamed (beamed-sexp)
-  (destructuring-bind (beamed &rest chord-sexps) beamed-sexp
-    (assert (string-equal (symbol-name beamed) "BEAMED"))
-    (loop :for chord-sexp :in chord-sexps
-          :collect (make-chord chord-sexp) :into chords
-          :finally (return (make-instance 'beamed :chords chords)))))
+(defun parse-beamed (s-expression)
+  (destructuring-bind (beamed &rest chord-s-expressions) s-expression
+    (assert (eq beamed :beamed)) ; Shouldn't be logically possible,
+                                 ; but just in case!
+    (make-beamed (mapcar 'parse-chord (rest s-expression)))))
 
-(defun make-construct (sexp)
-  (let ((first-elem (first sexp)))
+(defun parse-construct (s-expression)
+  (let ((first-elem (first s-expression)))
     (cond
-      ((typep first-elem 'integer) (make-chord sexp))
-      ((eq first-elem :beamed) (make-beamed sexp))
-      (t (error "Unexpected element ~s in ~s" first-elem sexp)))))
+      ((eq first-elem :beamed) (parse-beamed s-expression))
+      ((typep first-elem 'fixnum) (parse-chord s-expression))
+      (t (error "Malformed expression ~S" s-expression)))))
 
-(defun group-constructs (constructs timesig)
-  "Group constructs together into bars."
-  (loop :with bars := ()
-        :with bar-constructs := ()
-        :with beats := 0
-
-        :for construct :in constructs
-        :do (incf beats (beat-length construct (beat-root timesig)))
-        :do (push construct bar-constructs)
-        :do (restart-case (cond
-                            ((= beats (beats-per-bar timesig))
-                             (push (nreverse bar-constructs) bars)
-                             (setf bar-constructs ())
-                             (setf beats 0))
-                            ((> beats (beats-per-bar timesig))
-                             (error "Found ~S beats in bar ~S by construct ~S."
-                                    beats (length bars) construct)))
-              (skip-rest ()
-                :report (lambda (stream)
-                          (format stream "Skip grouping the rest of the constructs."))
-                (return (nreverse bars))))
-
-        :finally (restart-case
-                     (if (zerop beats)
-                         (return (nreverse bars))
-                         (error "Found ~S beats in the final bar ~S by construct ~S."
-                                beats (length bars) construct))
-                   (skip-rest ()
-                     :report (lambda (stream)
-                               (format stream "Skip the last unfinished bar."))
-                     (return (nreverse bars))))))
+(defun parse-tablature (s-expression)
+  (destructuring-bind (deftablature title (&key (timesig '(4 . 4))
+                                             (keys 17)
+                                             bars-per-staff
+                                             repeats
+                                             (accidentals "-------")
+                                             &allow-other-keys)
+                       &body construct-s-expressions) s-expression
+    (assert (eq deftablature :deftablature))
+    (make-tablature title
+                    keys
+                    timesig
+                    (mapcar 'parse-construct
+                            construct-s-expressions)
+                    accidentals
+                    repeats
+                    bars-per-staff)))
 
 (defun eval-kab (tab-sexp)
-  (destructuring-bind (deftablature title proplist
-                       &body construct-sexps) tab-sexp
-    (assert (eq deftablature :deftablature))
-    (check-type title string)
-
-    (let ((timesig (getf proplist :timesig (cons 4 4)))
-          (keys (getf proplist :keys 17))
-          (bars-per-staff (getf proplist :bars-per-staff))
-          (repeats (getf proplist :repeats))
-          (accidentals (getf proplist :accidentals)))
-      (check-type timesig (cons integer integer))
-      (check-type keys integer)
-      (check-type bars-per-staff (or integer null))
-      (check-type repeats list)
-      (check-type accidentals (or string null))
-
-      (loop :for sexp :in construct-sexps
-            :collect (make-construct sexp) :into constructs
-            :finally (return
-                       (make-instance
-                        'tablature
-                        :title title
-                        :timesig timesig
-                        :keys keys
-                        :bars-per-staff bars-per-staff
-                        :repeats repeats
-                        :accidentals (or accidentals "-------")
-                        :bars
-                        (group-constructs constructs
-                                          timesig)))))))
+  (parse-tablature tab-sexp))
