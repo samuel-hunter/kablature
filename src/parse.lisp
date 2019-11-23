@@ -24,14 +24,14 @@
       (t (error "Malformed expression ~S" s-expression)))))
 
 (defun parse-tablature (s-expression)
-  (destructuring-bind (deftablature title (&key (timesig '(4 . 4))
-                                             (keys 17)
-                                             bars-per-staff
-                                             repeats
-                                             (accidentals "-------")
-                                             &allow-other-keys)
+  (destructuring-bind (deftablature title
+                          (&key (timesig '(4 . 4)) (keys 17)
+                                bars-per-staff repeats
+                                (accidentals "-------")
+                                &allow-other-keys)
                        &body construct-s-expressions) s-expression
-    (assert (eq deftablature :deftablature))
+    (assert (eq deftablature :deftablature)
+            (s-expression) "Malformed expression ~S" s-expression)
     (make-tablature title
                     keys
                     timesig

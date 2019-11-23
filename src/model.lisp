@@ -60,6 +60,9 @@
 (defclass beamed ()
   ((chords :accessor chords :initarg :chords)))
 
+(defmethod keys ((beamed beamed))
+  (reduce 'union (mapcar 'keys (chords beamed))))
+
 (defun make-beamed (chords)
   (loop :for chord :in chords
         :do (assert (member (note chord) +valid-beamed-notes+)
@@ -119,12 +122,21 @@
    (accidentals :reader accidentals :initarg :accidentals)
    (bars :reader bars :initarg :bars)))
 
+(defun check-keys (construct max-key)
+  "Assert that all keys found in the construct"
+  (dolist (key (keys construct))
+    (assert (<= key max-key)
+            (key)
+            "Found key ~S in tablature with only ~S keys."
+            key max-key)))
+
 (defun make-tablature (title keys timesig constructs
                        accidentals repeats bars-per-staff)
   (check-type title string)
   (check-type keys fixnum)
   (check-type timesig (cons integer integer))
-  ;; TODO check all chords that their keys are within the tablature's key max.
+  (dolist (construct constructs)
+    (check-keys construct keys))
   (check-type bars-per-staff (or integer null))
   (check-type repeats list)
   (assert (evenp (length repeats))
